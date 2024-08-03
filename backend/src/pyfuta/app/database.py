@@ -8,20 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from pyfuta import config
 
 
-engine = create_engine(config.database_url, echo=False)
+engine = create_engine(config.database_url, echo=True)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
 
 
-def create_db_and_tables(engine):
-    import pyfuta.app.report.models  # make sure all models are imported (keep its record in metadata)
+async def create_db_and_tables(engine):
+    # make sure all models are imported (keep its record in metadata)
+    import pyfuta.app.report.models as models
+    import pyfuta.app.report.builder as builder
 
-    pyfuta.app.report.models.SQLModel.metadata.create_all(engine)
-
-
-def drop_db_and_tables(engine):
-    import pyfuta.app.report.models  # make sure all models are imported (keep its record in metadata)
-
-    pyfuta.app.report.models.SQLModel.metadata.drop_all(engine)
+    models.metadata.create_all(engine)
+    await builder.metadata.create_all()
 
 
 # https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec

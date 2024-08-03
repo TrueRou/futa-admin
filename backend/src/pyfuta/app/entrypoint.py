@@ -6,7 +6,7 @@ from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
 from pyfuta.app import database, report
-from pyfuta.app.database import session_ctx
+from pyfuta.app.database import async_session_ctx, session_ctx
 from pyfuta.app.logging import log, Ansi
 
 
@@ -30,13 +30,10 @@ def init_middlewares(asgi_app: FastAPI) -> None:
 def init_events(asgi_app: FastAPI) -> None:
     @asgi_app.on_event("startup")
     async def on_startup() -> None:
-        try:
-            with session_ctx() as session:
-                session.exec(text("SELECT 1"))
-                database.create_db_and_tables(database.engine)  # TODO: Sql migration
-                log("Startup process complete.", Ansi.LGREEN)
-        except OperationalError:
-            log("Failed to connect to the database.", Ansi.RED)
+        async with async_session_ctx() as session:
+            await session.execute(text("SELECT 1"))  # Test connection
+            await database.create_db_and_tables(database.engine)  # TODO: Sql migration
+            log("Startup process complete.", Ansi.LGREEN)
 
     @asgi_app.on_event("shutdown")
     async def on_shutdown() -> None:

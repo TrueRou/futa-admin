@@ -1,29 +1,55 @@
 from pyfuta.app import database
 from pyfuta.app.report.models import Report, ReportField, ReportFieldType
-from sqlmodel import Session
+from sqlalchemy import delete
 
 
-class F:
-    def __init__(self, name: str, type: ReportFieldType = ReportFieldType.NUMBER):
+class Text:
+    def __init__(self, name: str, field_name: str = None):
         self.name = name
-        self.type = type
+        self.type = ReportFieldType.TEXT
+        self.field_name = field_name
 
 
-class ReportBuilder:
-    field_pos: int = 0
-    report_fields: list[ReportField] = []
+class Number:
+    def __init__(self, name: str, field_name: str = None):
+        self.name = name
+        self.type = ReportFieldType.NUMBER
+        self.field_name = field_name
 
-    def __init__(self, name: str, sql: str, fields: list[str | F]):
-        self.report = Report(name=name, sql=sql)
+
+class Report:
+    def __init__(self, name: str, sql: str, table_name: str):
+        self.object = Report(name=name, sql=sql, table_name=table_name)
+        self.field_pos = 0
+        self.report_fields = []
+        metadata.append(self)
+
+    def fields(self, *fields: list[str | Text | Number]):
         for field in fields:
-            field = F(name=field) if isinstance(field, str) else field
-            self.report_fields.append(ReportField(field_pos=self.field_pos, name=field.name, type=field.type))
+            field = Text(name=field) if isinstance(field, str) else field
+            self.report_fields.append(ReportField(field_pos=self.field_pos, name=field.name, type=field.type, field_name=field.field_name))
             self.field_pos += 1
 
-    def build(self, session: Session) -> Report:
-        database.add_model(session, self.report)
-        for field in self.report_fields:
-            field.report_id = self.report.id
-        session.add_all(self.report_fields)
-        session.commit()
-        return self.report
+
+class Metadata(list[Report]):
+    async def create_all(self):
+        import pyfuta.app.defs.reports  # noqa
+
+        async with database.async_session_ctx() as session:
+            # Builder is the only one that can alter the table, so we can safely recreate the tables.
+            # This is a simple way to handle migrations, until we need to support dynamic creation.
+            await session.execute(delete(ReportField))
+            await session.execute(delete(Report))
+            await session.commit()  # Save the changes to the database.
+            for builder in self:
+                session.add(builder.object)
+                if isinstance(builder, Report):
+                    await session.commit()  # This is necessary to get the id
+                    await session.refresh(builder.object)
+                    for field in builder.report_fields:
+                        field.report_id = builder.object.id
+                    session.add_all(builder.report_fields)
+            await session.commit()  # Apply the changes to all the transactions.
+
+
+metadata: Metadata = Metadata()
