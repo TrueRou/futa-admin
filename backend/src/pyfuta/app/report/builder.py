@@ -1,5 +1,5 @@
 from pyfuta.app import database
-from pyfuta.app.report.models import Report, ReportField, ReportFieldType
+from pyfuta.app.report.models import Report, ReportField, ReportFieldType, ReportType
 from sqlalchemy import delete
 
 
@@ -18,7 +18,7 @@ class Number:
 
 
 class Report:
-    def __init__(self, name: str, sql: str, table_name: str):
+    def __init__(self, name: str, sql: str, table_name: str = None):
         self.object = Report(name=name, sql=sql, table_name=table_name)
         self.field_pos = 0
         self.report_fields = []
@@ -29,6 +29,12 @@ class Report:
             field = Text(name=field) if isinstance(field, str) else field
             self.report_fields.append(ReportField(field_pos=self.field_pos, name=field.name, type=field.type, field_name=field.field_name))
             self.field_pos += 1
+        return self
+
+    def chart(self, chart_type: ReportType, x_field: str, y_field: str):
+        self.object.type = chart_type
+        self.fields(x_field, Number(y_field))
+        return self
 
 
 class Metadata(list[Report]):

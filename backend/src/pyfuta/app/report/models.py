@@ -5,13 +5,19 @@ from sqlmodel import Field, SQLModel
 metadata = SQLModel.metadata
 
 
+class ReportType(IntEnum):
+    FORM = auto()
+    LINE_CHART = auto()
+    BAR_CHART = auto()
+
+
 class ReportFieldType(IntEnum):
     TEXT = auto()
     NUMBER = auto()
 
     def parse(self, value: Any) -> Any:
         if self == ReportFieldType.NUMBER:
-            return int(value)
+            return float(value)  # we consider all numbers as floats
         return value
 
 
@@ -21,6 +27,7 @@ class Report(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
     sql: str
+    type: ReportType = Field(default=ReportType.FORM)
     table_name: str | None = Field(default=None)
 
 
