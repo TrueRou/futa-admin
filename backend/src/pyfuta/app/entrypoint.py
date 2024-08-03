@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
 from starlette.middleware.cors import CORSMiddleware
 
-from pyfuta.app import database, report
-from pyfuta.app.database import async_session_ctx, session_ctx
+from pyfuta.app import database, pages, reports
+from pyfuta.app.database import async_session_ctx
 from pyfuta.app.logging import log, Ansi
 
 
@@ -46,7 +45,8 @@ def init_routes(asgi_app: FastAPI) -> None:
     async def root():
         return {"message": "Welcome to pyfuta!"}
 
-    asgi_app.include_router(report.routes.router)
+    asgi_app.include_router(reports.routes.router)
+    asgi_app.include_router(pages.routes.router)
 
 
 def init_api() -> FastAPI:

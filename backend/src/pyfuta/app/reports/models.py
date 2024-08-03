@@ -46,8 +46,15 @@ class ReportFieldPublic(SQLModel):
     type: ReportFieldType
 
 
+class ReportSimple(SQLModel):
+    id: int
+    name: str
+    type: ReportType = Field(default=ReportType.FORM)
+
+
 class ReportPublic(SQLModel):
     id: int
     name: str
+    type: ReportType = Field(default=ReportType.FORM)
     fields: list[ReportFieldPublic]
     data: list[tuple]  # this will be the data returned from the table query

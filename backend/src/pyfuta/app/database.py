@@ -1,6 +1,6 @@
 import contextlib
 from fastapi import Request
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlmodel import SQLModel, create_engine, Session, select
 from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -12,13 +12,24 @@ engine = create_engine(config.database_url, echo=True)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
 
 
+async def drop_def_tables():
+    async with async_engine.begin() as conn:
+        result = await conn.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))
+        [await conn.execute(text(f"DROP TABLE {table_name}")) for (table_name,) in result if table_name.startswith("def_")]
+
+
 async def create_db_and_tables(engine):
     # make sure all models are imported (keep its record in metadata)
-    import pyfuta.app.report.models as models
-    import pyfuta.app.report.builder as builder
 
-    models.metadata.create_all(engine)
-    await builder.metadata.create_all()
+    import pyfuta.app.pages.models as models
+    import pyfuta.app.reports.models as models
+    import pyfuta.app.reports.builder as reports
+    import pyfuta.app.pages.builder as pages
+
+    await drop_def_tables()  # drop all def tables, we will recreate them
+    models.metadata.create_all(engine)  # tricks the linter
+    await reports.metadata.create_all()
+    await pages.metadata.create_all()
 
 
 # https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec
@@ -45,22 +56,3 @@ def session_ctx():
 async def async_session_ctx():
     async with AsyncSession(async_engine) as session:
         yield session
-
-
-def count(model: _TCCA[_T0]) -> SelectOfScalar[int]:
-    return select(func.count()).select_from(model)
-
-
-def add_model(session: Session, *models):
-    [session.add(model) for model in models if model]
-    session.commit()
-    [session.refresh(model) for model in models if model]
-
-
-def partial_update_model(session: Session, item: SQLModel, updates: SQLModel):
-    if item and updates:
-        update_data = updates.model_dump(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(item, key, value)
-        session.commit()
-        session.refresh(item)

@@ -1,8 +1,8 @@
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pyfuta.app.database import require_session
-from pyfuta.app.report import dispatcher
-from pyfuta.app.report.models import Report, Report, ReportField, ReportPublic
+from pyfuta.app.reports import dispatcher
+from pyfuta.app.reports.models import Report, ReportField, ReportPublic
 from sqlmodel import Session, select
 
 
