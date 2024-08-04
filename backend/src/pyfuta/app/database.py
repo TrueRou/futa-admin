@@ -1,8 +1,7 @@
 import contextlib
 from fastapi import Request
-from sqlalchemy import func, text
-from sqlmodel import SQLModel, create_engine, Session, select
-from sqlmodel.sql.expression import _T0, _TCCA, SelectOfScalar
+from sqlalchemy import text
+from sqlmodel import create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from pyfuta import config

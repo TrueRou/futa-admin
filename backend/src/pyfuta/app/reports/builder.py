@@ -1,5 +1,7 @@
 from pyfuta.app import database
 from pyfuta.app.reports.models import Report, ReportField, ReportFieldType, ReportType
+from sqlalchemy import Column, Table
+from sqlmodel import SQLModel
 
 
 class Text:
@@ -36,6 +38,14 @@ class ReportBuilder:
         self.fields(x_field, Number(y_field))
         return self
 
+    def _create_table(self):
+        table = Table(
+            self.report.table_name,
+            SQLModel.metadata,
+            [Column(field.field_name, field.type.as_sqla(), primary_key=field.is_primary_key) for field in self.report_fields],
+        )
+        SQLModel.metadata.create_all(database.engine, tables=[table])
+
 
 class Metadata(list[ReportBuilder]):
     async def create_all(self):
@@ -51,6 +61,23 @@ class Metadata(list[ReportBuilder]):
                     field.report_id = builder.report.id
                 session.add_all(builder.report_fields)
             await session.commit()  # Apply the changes to all the transactions.
+
+        SQLModel.metadata.create_all(
+            database.engine,
+            [
+                Table(
+                    builder.report.table_name,
+                    SQLModel.metadata,
+                    [
+                        Column(field.field_name, field.type.as_sqla(), primary_key=field.is_primary_key)
+                        for field in builder.report_fields
+                        if field.field_name is not None
+                    ],
+                )
+                for builder in self
+                if builder.report.table_name is not None
+            ],
+        )
 
 
 metadata: Metadata = Metadata()

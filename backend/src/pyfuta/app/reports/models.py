@@ -1,5 +1,6 @@
 from enum import IntEnum, auto
 from typing import Any
+from sqlalchemy import Column, DateTime, Float, String
 from sqlmodel import Field, SQLModel
 
 metadata = SQLModel.metadata
@@ -7,6 +8,7 @@ metadata = SQLModel.metadata
 
 class ReportType(IntEnum):
     FORM = auto()
+    EXCEL_TABLE = auto()
     LINE_CHART = auto()
     BAR_CHART = auto()
 
@@ -14,11 +16,22 @@ class ReportType(IntEnum):
 class ReportFieldType(IntEnum):
     TEXT = auto()
     NUMBER = auto()
+    DATETIME = auto()
 
     def parse(self, value: Any) -> Any:
         if self == ReportFieldType.NUMBER:
             return float(value)  # we consider all numbers as floats
+        if self == ReportFieldType.DATETIME:
+            raise NotImplementedError("Datetime parsing is not implemented")
         return value
+
+    def as_sqla(self) -> Any:
+        if self == ReportFieldType.NUMBER:
+            return Float
+        if self == ReportFieldType.TEXT:
+            return String
+        if self == ReportFieldType.DATETIME:
+            return DateTime
 
 
 class Report(SQLModel, table=True):
@@ -39,6 +52,10 @@ class ReportField(SQLModel, table=True):
     name: str
     type: ReportFieldType
     field_name: str | None = Field(default=None)
+    is_primary_key: bool = Field(default=False)
+
+    def to_column(self):
+        return
 
 
 class ReportFieldPublic(SQLModel):
