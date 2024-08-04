@@ -4,18 +4,23 @@ from sqlalchemy import Column, Table
 from sqlmodel import SQLModel
 
 
-class Text:
-    def __init__(self, name: str, field_name: str = None):
+class Field:
+    def __init__(self, name: str, field_name: str = None, pk: bool = False):
         self.name = name
+        self.field_name = field_name
+        self.is_primary_key = pk
+
+
+class Text(Field):
+    def __init__(self, name: str, field_name: str = None, pk: bool = False):
+        super().__init__(name, field_name, pk)
         self.type = ReportFieldType.TEXT
-        self.field_name = field_name
 
 
-class Number:
-    def __init__(self, name: str, field_name: str = None):
-        self.name = name
+class Number(Field):
+    def __init__(self, name: str, field_name: str = None, pk: bool = False):
+        super().__init__(name, field_name, pk)
         self.type = ReportFieldType.NUMBER
-        self.field_name = field_name
 
 
 class ReportBuilder:
@@ -29,7 +34,11 @@ class ReportBuilder:
     def fields(self, *fields: str | Text | Number):
         for field in fields:
             field = Text(name=field) if isinstance(field, str) else field
-            self.report_fields.append(ReportField(field_pos=self.field_pos, name=field.name, type=field.type, field_name=field.field_name))
+            self.report_fields.append(
+                ReportField(
+                    field_pos=self.field_pos, name=field.name, type=field.type, field_name=field.field_name, is_primary_key=field.is_primary_key
+                )
+            )
             self.field_pos += 1
         return self
 

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from pyfuta import config
 
 
-engine = create_engine(config.database_url, echo=True)
+engine = create_engine(config.database_url)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
 
 
