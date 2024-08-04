@@ -38,14 +38,6 @@ class ReportBuilder:
         self.fields(x_field, Number(y_field))
         return self
 
-    def _create_table(self):
-        table = Table(
-            self.report.table_name,
-            SQLModel.metadata,
-            [Column(field.field_name, field.type.as_sqla(), primary_key=field.is_primary_key) for field in self.report_fields],
-        )
-        SQLModel.metadata.create_all(database.engine, tables=[table])
-
 
 class Metadata(list[ReportBuilder]):
     async def create_all(self):
