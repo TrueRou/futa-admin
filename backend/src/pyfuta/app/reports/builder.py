@@ -60,7 +60,7 @@ class Metadata(list[ReportBuilder]):
                 Table(
                     builder.report.table_name,
                     SQLModel.metadata,
-                    [
+                    *[
                         Column(field.field_name, field.type.as_sqla(), primary_key=field.is_primary_key)
                         for field in builder.report_fields
                         if field.field_name is not None

@@ -53,5 +53,5 @@ def session_ctx():
 
 @contextlib.asynccontextmanager
 async def async_session_ctx():
-    async with AsyncSession(async_engine) as session:
+    async with AsyncSession(async_engine, expire_on_commit=False) as session:
         yield session
