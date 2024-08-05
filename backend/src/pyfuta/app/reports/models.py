@@ -61,6 +61,7 @@ class ReportField(SQLModel, table=True):
 class ReportFieldPublic(SQLModel):
     name: str
     type: ReportFieldType
+    field_name: str | None
 
 
 class ReportSimple(SQLModel):

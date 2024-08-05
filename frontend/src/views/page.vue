@@ -3,6 +3,8 @@ import { useSession } from '@/store/session';
 import axios from 'axios';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import ReportTable from './report/table.vue';
+import { ReportType, type ReportFull } from '@/types';
 
 const session = useSession()
 const route = useRoute()
@@ -14,5 +16,8 @@ page.reports.forEach(async (report) => {
 })
 </script>
 <template>
-    <div v-for="report in reports">{{ report.name }}</div>
+    <template v-for="report in reports">
+        <ReportTable v-if="report.type == ReportType.FORM" :data="report.data" :fields="report.fields" />
+    </template>
+
 </template>
