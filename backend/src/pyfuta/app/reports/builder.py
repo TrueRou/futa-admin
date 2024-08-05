@@ -42,9 +42,9 @@ class ReportBuilder:
             self.field_pos += 1
         return self
 
-    def chart(self, chart_type: ReportType, x_field: str, y_field: str):
+    def chart(self, chart_type: ReportType, x_field: str, *y_field: str):
         self.report.type = chart_type
-        self.fields(x_field, Number(y_field))
+        self.fields(x_field, *[Number(field) for field in y_field])
         return self
 
 

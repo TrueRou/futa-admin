@@ -5,7 +5,7 @@ from pyfuta.app.reports.builder import ReportBuilder
 
 class PageBuilder:
     def __init__(self, path: str, title: str, description: str = None):
-        self.page = Page(path=path, title=title, description=description)
+        self.page = Page(path=path, name=title, description=description)
         metadata.append(self)
 
     def reports(self, *reports: ReportBuilder):

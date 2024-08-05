@@ -1,6 +1,6 @@
 from enum import IntEnum, auto
 from typing import Any
-from sqlalchemy import Column, DateTime, Float, String
+from sqlalchemy import DateTime, Float, String
 from sqlmodel import Field, SQLModel
 
 metadata = SQLModel.metadata

@@ -6,7 +6,7 @@ class Page(SQLModel, table=True):
     __tablename__ = "def_pages"
 
     path: str = Field(primary_key=True)
-    title: str
+    name: str
     description: str
 
 
@@ -20,6 +20,6 @@ class PageReport(SQLModel, table=True):
 
 class PagePublic(SQLModel):
     path: str
-    title: str
+    name: str
     description: str | None
     reports: list[ReportSimple]

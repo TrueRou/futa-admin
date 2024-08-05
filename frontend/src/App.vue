@@ -33,13 +33,13 @@
                 </el-icon>
                 数据分析
               </template>
-              <el-menu-item v-for="page in session.pages" :index="'/' + page.path">{{ page.title }}</el-menu-item>
+              <el-menu-item v-for="page in session.pages" :index="'/' + page.path">{{ page.name }}</el-menu-item>
             </el-sub-menu>
           </el-menu>
         </el-scrollbar>
       </el-aside>
       <el-main class="content">
-        <router-view />
+        <router-view :key="$router.currentRoute.value.path" />
       </el-main>
     </el-container>
   </el-container>

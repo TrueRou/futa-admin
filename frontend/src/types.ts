@@ -29,7 +29,7 @@ interface ReportFull extends ReportSimple {
 
 interface Page {
     path: string;
-    title: string;
+    name: string;
     description: string;
     reports: ReportSimple[];
 }
