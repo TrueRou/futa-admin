@@ -1,2 +1,2 @@
 # futa-admin
-A low code analysis platform based on python, vue, element-plus.
+A low code business intelligence report platform based on python, vue, element-plus.
