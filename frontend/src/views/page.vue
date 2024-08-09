@@ -15,12 +15,21 @@ const reports = ref<ReportFull[]>([])
 page.reports.forEach(async (report) => {
     reports.value.push((await axios.post(`/reports/${report.id}`)).data)
 })
+
+const updateReports = async () => {
+    [...reports.value].forEach(async (report, index) => {
+        reports.value.splice(index, 1, (await axios.post(`/reports/${report.id}`)).data)
+    })
+}
 </script>
 <template>
-    <h1>{{ page.name }}</h1>
-    {{ page.description }}
-    <template v-for="report in reports">
-        <ReportTable v-if="report.type == ReportType.FORM" :report="report" />
-        <ReportChartLine v-else-if="report.type == ReportType.LINE_CHART" :report="report" />
-    </template>
+    <div class="ml-4 mt-4">
+        <h2>{{ page.name }}</h2>
+        <p class="text-lg">{{ page.description }}</p>
+    </div>
+
+    <div class="ml-4 mr-4" v-for="report in reports" :key="report.id">
+        <ReportTable v-if="report.type == ReportType.FORM" :report="report" @update="updateReports" />
+        <ReportChartLine v-if="report.type == ReportType.LINE_CHART" :report="report" />
+    </div>
 </template>

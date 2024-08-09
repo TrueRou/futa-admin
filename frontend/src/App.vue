@@ -1,20 +1,19 @@
 <template>
   <el-container class="h-full w-full">
-    <el-header style="text-align: right; font-size: 12px">
-      <div class="toolbar">
+    <el-header class="flex justify-between">
+      <div class="flex items-center font-bold text-lg">{{ siteName }}</div>
+      <div class="toolbar flex">
         <el-dropdown>
-          <el-icon style="margin-right: 8px; margin-top: 1px">
+          <el-icon :size="24" style="margin-right: 8px; margin-top: 1px">
             <setting />
           </el-icon>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>View</el-dropdown-item>
-              <el-dropdown-item>Add</el-dropdown-item>
-              <el-dropdown-item>Delete</el-dropdown-item>
+              <el-dropdown-item>导入数据表</el-dropdown-item>
+              <el-dropdown-item>查看数据表</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <span>Tom</span>
       </div>
     </el-header>
     <el-container>
@@ -46,18 +45,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref } from 'vue';
 import { useSession } from './store/session';
-import router from './router';
 
 const session = useSession();
+const siteName = ref(import.meta.env.VITE_SITE_NAME);
 
-const item = {
-  date: '2016-05-02',
-  name: 'Tom',
-  address: 'No. 189, Grove St, Los Angeles',
-}
-const tableData = ref(Array.from({ length: 200 }).fill(item))
 </script>
 
 <style scoped>

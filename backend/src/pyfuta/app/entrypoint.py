@@ -12,6 +12,7 @@ from pyfuta.app.logging import log, Ansi
 def init_middlewares(asgi_app: FastAPI) -> None:
     origins = [
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:3000",
     ]
 
