@@ -1,4 +1,4 @@
-from pyfuta.app.reports.builder import Number, ReportBuilder, Text
+from pyfuta.app.reports.builder import DateTime, FragmentBuilder, Number, ReportBuilder, Text
 from pyfuta.app.reports.models import ReportType
 
 products = [
@@ -9,7 +9,9 @@ products = [
 ]
 
 customers = [
-    ReportBuilder(name="Customers", sql="SELECT * FROM customers", table_name="customers").fields(
-        Number("编号", "id", pk=True), Text("名称", "name"), Number("电话", "phone")
+    ReportBuilder(name="Customers", sql="SELECT * FROM customers ${interval}", table_name="customers").fields(
+        Number("编号", "id", pk=True), Text("名称", "name"), Number("电话", "phone"), DateTime("创建时间", "created_at")
     )
 ]
+
+fragments = [FragmentBuilder(locator="interval", fragment="WHERE created_at > DATETIME('now', ${value})")]

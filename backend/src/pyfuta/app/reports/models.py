@@ -58,6 +58,16 @@ class ReportField(SQLModel, table=True):
         return
 
 
+class SQLFragment(SQLModel, table=True):
+    __tablename__ = "def_sql_fragments"
+
+    # example: SELECT * FROM scores ${interval}
+    # request dict: {"interval": "7 day"}
+
+    locator: str = Field(primary_key=True)  # locator: interval
+    fragment: str  # fragment: WHERE date_sub(curdate(), interval ${value}) <= date(created_at);
+
+
 class ReportFieldPublic(SQLModel):
     name: str
     field_pos: int

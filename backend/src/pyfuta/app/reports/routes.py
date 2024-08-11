@@ -31,8 +31,13 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
 
 
 @router.post("/{report_id}", response_model=ReportPublic)
-async def get_reports(filter: dict[str, Any] = {}, report: Report = Depends(require_report), fields: list[ReportField] = Depends(require_fields)):
-    data = await dispatcher.dispatch_statement(report.sql, filter)
+async def get_reports(
+    filter: dict[str, Any] = {},
+    report: Report = Depends(require_report),
+    fields: list[ReportField] = Depends(require_fields),
+    session: Session = Depends(require_session),
+):
+    data = await dispatcher.dispatch_statement(report.sql, filter, session)
     return ReportPublic(**report.model_dump(), fields=fields, data=data)
 
 
