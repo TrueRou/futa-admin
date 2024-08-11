@@ -1,5 +1,5 @@
 from pyfuta.app import database
-from pyfuta.app.reports.models import Report, ReportField, ReportFieldType, ReportType, SQLFragment
+from pyfuta.app.reports.models import Report, ReportField, ReportFieldType, ReportType, ReportFragment
 from sqlalchemy import Column, Table
 from sqlmodel import SQLModel
 
@@ -55,8 +55,8 @@ class ReportBuilder:
 
 
 class FragmentBuilder:
-    def __init__(self, locator: str, fragment: str):
-        self.fragment = SQLFragment(locator=locator, fragment=fragment)
+    def __init__(self, trait: str, sql: str, name: str, values: list[str]):
+        self.fragment = ReportFragment(trait=trait, sql=sql, name=name, values=",".join(values))
         metadata.append(self)
 
 

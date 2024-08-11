@@ -38,7 +38,14 @@
         </el-scrollbar>
       </el-aside>
       <el-main class="content">
-        <router-view :key="$router.currentRoute.value.path" />
+        <Suspense>
+          <template #default>
+            <router-view :key="$router.currentRoute.value.path" />
+          </template>
+          <template #fallback>
+            <el-skeleton :rows="16" :throttle="500" />
+          </template>
+        </Suspense>
       </el-main>
     </el-container>
   </el-container>

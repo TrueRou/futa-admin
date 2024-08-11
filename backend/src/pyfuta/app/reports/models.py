@@ -58,14 +58,19 @@ class ReportField(SQLModel, table=True):
         return
 
 
-class SQLFragment(SQLModel, table=True):
-    __tablename__ = "def_sql_fragments"
+class ReportFragment(SQLModel, table=True):
+    __tablename__ = "def_report_fragments"
 
     # example: SELECT * FROM scores ${interval}
-    # request dict: {"interval": "7 day"}
+    # request: {"interval": "7 day"}
+    # result: SELECT * FROM scores WHERE date_sub(curdate(), interval 7 day) <= date(created_at);
 
-    locator: str = Field(primary_key=True)  # locator: interval
-    fragment: str  # fragment: WHERE date_sub(curdate(), interval ${value}) <= date(created_at);
+    # global for all reports temporarily, will be moved to report (page maybe) level in the future.
+
+    trait: str = Field(primary_key=True)  # trait: interval
+    sql: str  # sql: WHERE date_sub(curdate(), interval ${value}) <= date(created_at);
+    name: str  # name: Time Interval
+    values: str | None = Field(default=None)  # value_list (split by ,): 1 day,7 day,30 day
 
 
 class ReportFieldPublic(SQLModel):
@@ -73,6 +78,12 @@ class ReportFieldPublic(SQLModel):
     field_pos: int
     type: ReportFieldType
     field_name: str | None
+
+
+class ReportFragmentPublic(SQLModel):
+    trait: str
+    name: str
+    values: list[str]
 
 
 class ReportSimple(SQLModel):

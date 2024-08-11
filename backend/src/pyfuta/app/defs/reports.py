@@ -14,4 +14,4 @@ customers = [
     )
 ]
 
-fragments = [FragmentBuilder(locator="interval", fragment="WHERE created_at > DATETIME('now', ${value})")]
+FragmentBuilder(trait="interval", sql="WHERE created_at > DATETIME('now', ${value})", name="最近时间", values=["1 day", "7 day", "30 day"])

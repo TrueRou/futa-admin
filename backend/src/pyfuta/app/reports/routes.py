@@ -2,7 +2,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pyfuta.app.database import require_session
 from pyfuta.app.reports import dispatcher
-from pyfuta.app.reports.models import Report, ReportField, ReportPublic
+from pyfuta.app.reports.models import Report, ReportField, ReportFragment, ReportFragmentPublic, ReportPublic
 from sqlmodel import Session, select
 
 
@@ -39,6 +39,12 @@ async def get_reports(
 ):
     data = await dispatcher.dispatch_statement(report.sql, filter, session)
     return ReportPublic(**report.model_dump(), fields=fields, data=data)
+
+
+@router.get("/fragments/", response_model=list[ReportFragmentPublic])
+async def get_fragments(session: Session = Depends(require_session)):
+    fragments = session.exec(select(ReportFragment)).all()
+    return [ReportFragmentPublic(trait=frag.trait, name=frag.name, values=frag.values.split(",")) for frag in fragments]
 
 
 @router.patch("/{report_id}")
