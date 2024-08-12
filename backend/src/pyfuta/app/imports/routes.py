@@ -28,10 +28,15 @@ async def import_excel(
     if len(headers) != len(table_headers):
         raise HTTPException(status_code=400, detail="Number of columns in the file does not match the number of table fields in the report")
 
+    parsed_rows = []
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        parsed_rows.append([field.type.parse(cell) for field, cell in zip(fields, row)])
+
     # we use sqlite dialect for insert on conflict do nothing
     table = Table(report.table_name, SQLModel.metadata, autoload_with=session.bind)
     statement = insert(table).on_conflict_do_nothing()
-    sentences = [dict(zip(table_headers, row)) for row in sheet.iter_rows(min_row=2, values_only=True)]
+    sentences = [dict(zip(table_headers, row)) for row in parsed_rows]
+
     async with async_engine.begin() as conn:
         await conn.execute(statement, sentences)
         await conn.commit()

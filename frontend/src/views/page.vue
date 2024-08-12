@@ -39,8 +39,8 @@ watch(filter_dict, async () => await updateReports(), { deep: true })
             <el-option v-for="item in frag.values" :key="item" :label="item" :value="item" />
         </el-select>
     </div>
-    <div class="ml-4 mr-4 mt-4" v-for="report in reports" :key="report.id">
+    <div class="ml-4 mr-4 mt-4 mb-4" v-for="report in reports" :key="report.id">
         <ReportTable v-if="report.type == ReportType.FORM" :report="report" @update="updateReports" />
-        <ReportChartLine v-if="report.type == ReportType.LINE_CHART" :report="report" />
+        <ReportChartLine v-else-if="report.type == ReportType.LINE_CHART" :report="report" />
     </div>
 </template>

@@ -63,7 +63,7 @@ const onInputTableBlur = async (scope: any) => {
 
 </script>
 <template>
-    <el-table :data="tableData" class="w-full" :max-height="200" :border="true">
+    <el-table :data="tableData" class="w-full" :max-height="600" :border="true">
         <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name"
             :min-width="findWidth(field)">
             <template #header>
@@ -76,9 +76,11 @@ const onInputTableBlur = async (scope: any) => {
                 <el-input v-if="tableRowEditIndex === scope.$index && tableColumnEditIndex == scope.column.id"
                     ref="tableRowInputRef" v-model="scope.row[scope.column.property]" @blur="onInputTableBlur(scope)"
                     @keyup.enter="(e: any) => e.target.blur()" />
-                <p v-else @dblclick="dbClickCell(scope)">
-                    {{ scope.row[scope.column.property] }}
-                </p>
+                <div v-else class=" h-8" @dblclick="dbClickCell(scope)">
+                    <p>
+                        {{ scope.row[scope.column.property] }}
+                    </p>
+                </div>
             </template>
         </el-table-column>
     </el-table>

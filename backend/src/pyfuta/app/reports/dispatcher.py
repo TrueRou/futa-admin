@@ -24,4 +24,9 @@ async def dispatch_statement(statement: str, parameters: dict, session: Session)
 async def dispatch_updating(table_name: str, field_name: str, nav_field_name: str, value: Any, nav_value: Any):
     value_dict = {"value": value, "nav_value": nav_value}
     async with async_engine.begin() as conn:
-        await conn.execute(text(f"UPDATE {table_name} SET {field_name}=:value WHERE {nav_field_name}=:nav_value"), value_dict)
+        await conn.execute(
+            text(
+                f"INSERT INTO {table_name} ({field_name}, {nav_field_name}) VALUES (:value, :nav_value) ON CONFLICT ({nav_field_name}) DO UPDATE SET {field_name}=:value"
+            ),
+            value_dict,
+        )

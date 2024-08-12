@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import IntEnum, auto
 from typing import Any
 from sqlalchemy import DateTime, Float, String
@@ -18,11 +19,17 @@ class ReportFieldType(IntEnum):
     NUMBER = auto()
     DATETIME = auto()
 
-    def parse(self, value: Any) -> Any:
+    def parse(self, value: str) -> Any:
         if self == ReportFieldType.NUMBER:
-            return float(value)  # we consider all numbers as floats
+            try:
+                return float(value)
+            except ValueError:
+                return 0
         if self == ReportFieldType.DATETIME:
-            raise NotImplementedError("Datetime parsing is not implemented")
+            try:
+                return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                return None
         return value
 
     def as_sqla(self) -> Any:
