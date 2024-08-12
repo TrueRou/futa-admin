@@ -1,1 +1,2 @@
 *.db
+/backend/src/pyfuta/app/defs
