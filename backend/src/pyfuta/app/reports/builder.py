@@ -1,5 +1,5 @@
 from pyfuta.app import database
-from pyfuta.app.reports.models import Report, ReportField, ReportFieldType, ReportType, ReportFragment
+from pyfuta.app.reports.models import Report, ReportField, ReportFieldType, ReportFragmentType, ReportType, ReportFragment
 from sqlalchemy import Column, Table
 from sqlmodel import SQLModel
 
@@ -29,12 +29,18 @@ class DateTime(Field):
         self.type = ReportFieldType.DATETIME
 
 
+class Fragment:
+    def __init__(self, trait: str, sql: str, name: str, type: ReportFragmentType, values: list[str] = None):
+        self.fragment = ReportFragment(trait=trait, sql=sql, name=name, type=type, values=",".join(values) if values else None)
+
+
 class ReportBuilder:
     def __init__(self, name: str, sql: str, table_name: str = None):
         self.report = Report(name=name, sql=sql, table_name=table_name)
         self.field_pos: int = 0
         self.report_id: int = -1
         self.report_fields: list[ReportField] = []
+        self.report_fragments: list[Fragment] = []
         metadata.append(self)
 
     def fields(self, *fields: str | Text | Number):
@@ -53,29 +59,27 @@ class ReportBuilder:
         self.fields(x_field, *[Number(field) for field in y_field])
         return self
 
-
-class FragmentBuilder:
-    def __init__(self, trait: str, sql: str, name: str, values: list[str]):
-        self.fragment = ReportFragment(trait=trait, sql=sql, name=name, values=",".join(values))
-        metadata.append(self)
+    def fragments(self, *fragments: Fragment):
+        self.report_fragments = fragments
+        return self
 
 
-class Metadata(list[ReportBuilder | FragmentBuilder]):
+class Metadata(list[ReportBuilder]):
     async def create_all(self):
         import pyfuta.app.defs.reports  # noqa
 
         async with database.async_session_ctx() as session:
             for builder in self:
-                if isinstance(builder, ReportBuilder):
-                    session.add(builder.report)
-                    await session.commit()  # This is necessary to get the id
-                    await session.refresh(builder.report)
-                    builder.report_id = builder.report.id
-                    for field in builder.report_fields:
-                        field.report_id = builder.report.id
-                    session.add_all(builder.report_fields)
-                elif isinstance(builder, FragmentBuilder):
-                    session.add(builder.fragment)
+                session.add(builder.report)
+                await session.commit()  # This is necessary to get the id
+                await session.refresh(builder.report)
+                builder.report_id = builder.report.id
+                for field in builder.report_fields:
+                    field.report_id = builder.report.id
+                for fragment in builder.report_fragments:
+                    fragment.fragment.report_id = builder.report.id
+                session.add_all(builder.report_fields)
+                session.add_all(builder.report_fragments)
 
             await session.commit()  # Apply the changes to all the transactions.
 

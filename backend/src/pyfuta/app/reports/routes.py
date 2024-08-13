@@ -38,13 +38,12 @@ async def get_reports(
     session: Session = Depends(require_session),
 ):
     data = await dispatcher.dispatch_statement(report.sql, filter, session)
-    return ReportPublic(**report.model_dump(), fields=fields, data=data)
-
-
-@router.get("/fragments/", response_model=list[ReportFragmentPublic])
-async def get_fragments(session: Session = Depends(require_session)):
-    fragments = session.exec(select(ReportFragment)).all()
-    return [ReportFragmentPublic(trait=frag.trait, name=frag.name, values=frag.values.split(",")) for frag in fragments]
+    fragments = session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
+    fragments = [
+        ReportFragmentPublic(**frag.model_dump(exclude=["values"]), values=frag.values.split(",") if frag.values is not None else None)
+        for frag in fragments
+    ]
+    return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=fragments)
 
 
 @router.patch("/{report_id}")

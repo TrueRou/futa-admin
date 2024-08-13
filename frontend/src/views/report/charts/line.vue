@@ -2,10 +2,14 @@
 import { type ReportFull } from '@/types';
 import VChart from 'vue-echarts';
 import 'echarts';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<{
     report: ReportFull
+}>()
+
+const emits = defineEmits<{
+    update: []
 }>()
 
 const option = computed(() => {

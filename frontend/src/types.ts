@@ -5,6 +5,11 @@ enum ReportType {
     BAR_CHART = 4
 }
 
+enum ReportFragmentType {
+    FILTER_SELECT = 1,
+    FILTER_DATEPICKER = 2
+}
+
 enum ReportFieldType {
     TEXT = 1,
     NUMBER = 2
@@ -26,11 +31,13 @@ interface ReportField {
 interface ReportFragment {
     trait: string;
     name: string;
-    values: string[];
+    type: ReportFragmentType;
+    values: string[] | null;
 }
 
 interface ReportFull extends ReportSimple {
     fields: ReportField[];
+    fragments: ReportFragment[];
     data: (string | number)[][];
 }
 
@@ -41,4 +48,4 @@ interface Page {
     reports: ReportSimple[];
 }
 
-export { ReportType, ReportFieldType, type ReportSimple, type ReportField, type ReportFragment, type ReportFull, type Page };
+export { ReportType, ReportFieldType, ReportFragmentType, type ReportSimple, type ReportField, type ReportFragment, type ReportFull, type Page };

@@ -14,6 +14,12 @@ class ReportType(IntEnum):
     BAR_CHART = auto()
 
 
+class ReportFragmentType(IntEnum):
+    # FILTER: from 1 to 10 (this is quite arbitrary, maybe we can change it later)
+    FILTER_SELECT = 1
+    FILTER_DATEPICKER = 2
+
+
 class ReportFieldType(IntEnum):
     TEXT = auto()
     NUMBER = auto()
@@ -68,16 +74,12 @@ class ReportField(SQLModel, table=True):
 class ReportFragment(SQLModel, table=True):
     __tablename__ = "def_report_fragments"
 
-    # example: SELECT * FROM scores ${interval}
-    # request: {"interval": "7 day"}
-    # result: SELECT * FROM scores WHERE date_sub(curdate(), interval 7 day) <= date(created_at);
-
-    # global for all reports temporarily, will be moved to report (page maybe) level in the future.
-
-    trait: str = Field(primary_key=True)  # trait: interval
-    sql: str  # sql: WHERE date_sub(curdate(), interval ${value}) <= date(created_at);
-    name: str  # name: Time Interval
-    values: str | None = Field(default=None)  # value_list (split by ,): 1 day,7 day,30 day
+    report_id: int = Field(foreign_key="def_reports.id", primary_key=True)
+    trait: str = Field(primary_key=True)
+    sql: str
+    name: str
+    type: ReportFragmentType = Field(default=ReportFragmentType.FILTER_SELECT)
+    values: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
 
 
 class ReportFieldPublic(SQLModel):
@@ -90,7 +92,8 @@ class ReportFieldPublic(SQLModel):
 class ReportFragmentPublic(SQLModel):
     trait: str
     name: str
-    values: list[str]
+    type: ReportFragmentType
+    values: list[str] | None
 
 
 class ReportSimple(SQLModel):
@@ -104,4 +107,5 @@ class ReportPublic(SQLModel):
     name: str
     type: ReportType = Field(default=ReportType.FORM)
     fields: list[ReportFieldPublic]
+    fragments: list[ReportFragmentPublic]
     data: list[tuple]  # this will be the data returned from the table query
