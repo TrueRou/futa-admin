@@ -1,23 +1,33 @@
 from typing import Any
 from pyfuta.app.database import async_engine
-from pyfuta.app.reports.models import ReportFragment
+from pyfuta.app.reports.models import ReportFragment, ReportFragmentType
 from sqlalchemy import text
 from sqlmodel import Session
 import re
 
 
-async def dispatch_statement(statement: str, parameters: dict, session: Session):
-    for locator_key in parameters.keys():
-        frag = session.get(ReportFragment, locator_key)
-        if frag is not None and statement.find("${" + locator_key + "}") != -1:
-            # replace the locator with the named fragment parameters.
-            fragment = frag.sql.replace("${value}", f":{locator_key}")
-            statement = statement.replace("${" + locator_key + "}", fragment)
+async def dispatch_statement(statement: str, parameters: dict, session: Session, report_id: int):
+    sql_parameters = {}
+    for trait in parameters.keys():
+        frag = session.get(ReportFragment, (report_id, trait))
+        if frag is not None and statement.find("${" + trait + "}") != -1:
+            fragment = frag.sql
+            if frag.type == ReportFragmentType.FILTER_SELECT:
+                # replace the trait with the named fragment parameters.
+                fragment = frag.sql.replace("${value}", f":{trait}")
+                statement = statement.replace("${" + trait + "}", fragment)
+                sql_parameters = parameters
+            elif frag.type == ReportFragmentType.FILTER_DATEPICKER:
+                for index, value in enumerate(parameters[trait].split(",")):
+                    fragment = fragment.replace("${value" + str(index) + "}", f":{trait + str(index)}")
+                    sql_parameters[trait + str(index)] = value
+                statement = statement.replace("${" + trait + "}", fragment)
     statement = re.sub(r"\${.*?}", "", statement)  # remove any remaining unused fragments
+    print(statement)
     async with async_engine.begin() as conn:
         # execute the statement with the replaced parameters.
         # the binding here is safe because we moved sanitized work to the sqlalchemy.
-        result = await conn.execute(text(statement), parameters)
+        result = await conn.execute(text(statement), sql_parameters)
         return result.fetchall()
 
 

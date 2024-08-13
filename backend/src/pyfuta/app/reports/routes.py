@@ -32,18 +32,18 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
 
 @router.post("/{report_id}", response_model=ReportPublic)
 async def get_reports(
-    filter: dict[str, Any] = {},
+    fragments: dict[str, Any] = {},
     report: Report = Depends(require_report),
     fields: list[ReportField] = Depends(require_fields),
     session: Session = Depends(require_session),
 ):
-    data = await dispatcher.dispatch_statement(report.sql, filter, session)
-    fragments = session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
-    fragments = [
+    fragments = {k: v for k, v in fragments.items() if v is not None}
+    data = await dispatcher.dispatch_statement(report.sql, fragments, session, report.id)
+    frags = [
         ReportFragmentPublic(**frag.model_dump(exclude=["values"]), values=frag.values.split(",") if frag.values is not None else None)
-        for frag in fragments
+        for frag in session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
     ]
-    return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=fragments)
+    return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=frags)
 
 
 @router.patch("/{report_id}")

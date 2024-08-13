@@ -6,27 +6,25 @@ from sqlmodel import SQLModel
 
 class Field:
     def __init__(self, name: str, field_name: str = None, pk: bool = False):
-        self.name = name
-        self.field_name = field_name
-        self.is_primary_key = pk
+        self.field = ReportField(name=name, field_name=field_name, is_primary_key=pk)
 
 
 class Text(Field):
     def __init__(self, name: str, field_name: str = None, pk: bool = False):
         super().__init__(name, field_name, pk)
-        self.type = ReportFieldType.TEXT
+        self.field.type = ReportFieldType.TEXT
 
 
 class Number(Field):
     def __init__(self, name: str, field_name: str = None, pk: bool = False):
         super().__init__(name, field_name, pk)
-        self.type = ReportFieldType.NUMBER
+        self.field.type = ReportFieldType.NUMBER
 
 
 class DateTime(Field):
     def __init__(self, name: str, field_name: str = None, pk: bool = False):
         super().__init__(name, field_name, pk)
-        self.type = ReportFieldType.DATETIME
+        self.field.type = ReportFieldType.DATETIME
 
 
 class Fragment:
@@ -40,17 +38,14 @@ class ReportBuilder:
         self.field_pos: int = 0
         self.report_id: int = -1
         self.report_fields: list[ReportField] = []
-        self.report_fragments: list[Fragment] = []
+        self.report_fragments: list[ReportFragment] = []
         metadata.append(self)
 
     def fields(self, *fields: str | Text | Number):
         for field in fields:
             field = Text(name=field) if isinstance(field, str) else field
-            self.report_fields.append(
-                ReportField(
-                    field_pos=self.field_pos, name=field.name, type=field.type, field_name=field.field_name, is_primary_key=field.is_primary_key
-                )
-            )
+            field.field.field_pos = self.field_pos
+            self.report_fields.append(field.field)
             self.field_pos += 1
         return self
 
@@ -60,7 +55,8 @@ class ReportBuilder:
         return self
 
     def fragments(self, *fragments: Fragment):
-        self.report_fragments = fragments
+        for fragment in fragments:
+            self.report_fragments.append(fragment.fragment)
         return self
 
 
@@ -77,7 +73,7 @@ class Metadata(list[ReportBuilder]):
                 for field in builder.report_fields:
                     field.report_id = builder.report.id
                 for fragment in builder.report_fragments:
-                    fragment.fragment.report_id = builder.report.id
+                    fragment.report_id = builder.report.id
                 session.add_all(builder.report_fields)
                 session.add_all(builder.report_fragments)
 
