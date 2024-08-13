@@ -63,11 +63,11 @@ const onInputTableBlur = async (scope: any) => {
 
 </script>
 <template>
-    <el-table :data="tableData" class="w-full" :max-height="600" :border="true">
+    <el-table :data="tableData" class="w-full" :max-height="400" stripe show-summary>
         <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name"
             :min-width="findWidth(field)">
             <template #header>
-                <el-icon v-if="field.field_name != null">
+                <el-icon v-if="field.field_name != null && field.field_pos != 0">
                     <EditPen />
                 </el-icon>
                 {{ field.name }}

@@ -44,8 +44,5 @@ const option = computed(() => {
 })
 </script>
 <template>
-    <el-card class="mt-4" shadow="hover">
-        <template #header><span class="font-semibold">{{ report.name }}</span></template>
-        <v-chart class="h-80" :option="option" autoresize></v-chart>
-    </el-card>
+    <v-chart class="h-80" :option="option" autoresize></v-chart>
 </template>

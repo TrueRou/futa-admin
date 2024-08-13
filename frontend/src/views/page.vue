@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSession } from '@/store/session';
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import ReportTable from './report/table.vue';
 import ReportChartLine from './report/charts/line.vue';
@@ -36,13 +36,19 @@ const updateFragment = (source: string, value: string) => {
         <p class="text-lg">{{ page.description }}</p>
     </div>
 
-    <div class="ml-4 mr-4 mt-4 mb-4" v-for="report in reports" :key="report.id">
-        <div class="mb-4">
-            <template v-for="fragment in report.fragments">
-                <ReportFilter v-if="fragment.type < 10" :fragment="fragment" @filter="updateFragment"></ReportFilter>
+    <div class="ml-4 mr-4 mt-4 mb-4" v-for="report in reports.sort((a, b) => a.id - b.id)" :key="report.id">
+        <el-card class="mt-4" shadow="hover">
+            <template #header>
+                <span class="font-semibold">{{ report.name }}</span>
+                <div class="mt-4" v-if="report.fragments.length != 0">
+                    <template v-for="fragment in report.fragments">
+                        <ReportFilter v-if="fragment.type < 10" :fragment="fragment" @filter="updateFragment">
+                        </ReportFilter>
+                    </template>
+                </div>
             </template>
-        </div>
-        <ReportTable v-if="report.type == ReportType.FORM" :report="report" @update="updateReports" />
-        <ReportChartLine v-else-if="report.type == ReportType.LINE_CHART" :report="report" />
+            <ReportTable v-if="report.type == ReportType.FORM" :report="report" @update="updateReports" />
+            <ReportChartLine v-else-if="report.type == ReportType.LINE_CHART" :report="report" />
+        </el-card>
     </div>
 </template>
