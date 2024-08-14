@@ -1,4 +1,6 @@
 import contextlib
+import os
+from pathlib import Path
 from fastapi import Request
 from sqlalchemy import text
 from sqlmodel import create_engine, Session
@@ -9,6 +11,16 @@ from pyfuta import config
 
 engine = create_engine(config.database_url)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
+
+
+def SQL(filename: str):
+    path1 = Path(__file__).parent.parent / "statements" / f"{filename}.sql"
+    path2 = Path(__file__).parent.parent.parent / "statements" / f"{filename}.sql"
+    if not path1.exists() and not path2.exists():
+        raise FileNotFoundError(f"SQL file not found: {filename}.sql")
+    path = path1 if path1.exists() else path2
+    with open(path, "r", encoding="utf-8") as file:
+        return file.read()
 
 
 async def drop_def_tables():

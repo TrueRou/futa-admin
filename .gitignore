@@ -1,2 +1,3 @@
 *.db
 /backend/src/pyfuta/app/defs
+/backend/src/pyfuta/statements
