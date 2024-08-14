@@ -1,8 +1,8 @@
 enum ReportType {
     FORM = 1,
     EXCEL_TABLE = 2,
-    LINE_CHART = 3,
-    BAR_CHART = 4
+    LINE_CHART = 11,
+    BAR_CHART = 12
 }
 
 enum ReportFragmentType {

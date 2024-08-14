@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
-    update: []
+    updateStamp: []
 }>()
 
 const tableRowEditIndex = ref(-1);
@@ -58,7 +58,7 @@ const onInputTableBlur = async (scope: any) => {
         value: value
     }))
 
-    emits('update') // update all the reports data in the current page.
+    emits('updateStamp') // update all the reports data in the current page.
 }
 
 </script>

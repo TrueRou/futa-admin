@@ -31,7 +31,7 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
 
 
 @router.post("/{report_id}", response_model=ReportPublic)
-async def get_reports(
+async def get_report(
     fragments: dict[str, Any] = {},
     report: Report = Depends(require_report),
     fields: list[ReportField] = Depends(require_fields),

@@ -8,10 +8,11 @@ metadata = SQLModel.metadata
 
 
 class ReportType(IntEnum):
-    FORM = auto()
-    EXCEL_TABLE = auto()
-    LINE_CHART = auto()
-    BAR_CHART = auto()
+    # CHART: from 11 to 20 (this is quite arbitrary, maybe we can change it later)
+    FORM = 1
+    EXCEL_TABLE = 2
+    LINE_CHART = 11
+    BAR_CHART = 12
 
 
 class ReportFragmentType(IntEnum):

@@ -29,10 +29,12 @@ watch(value, (newVal) => {
 
 </script>
 <template>
-    <el-select v-if="props.fragment.type == ReportFragmentType.FILTER_SELECT" style="width: 160px;" v-model="value"
-        :placeholder="'筛选 ' + props.fragment.name" size="large" clearable>
-        <el-option v-for="item in props.fragment.values" :key="item" :label="item" :value="item" />
-    </el-select>
-    <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEPICKER" v-model="value" type="daterange"
-        unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期" />
+    <div>
+        <el-select v-if="props.fragment.type == ReportFragmentType.FILTER_SELECT" style="width: 160px;" v-model="value"
+            :placeholder="'筛选 ' + props.fragment.name" size="large" clearable>
+            <el-option v-for="item in props.fragment.values" :key="item" :label="item" :value="item" />
+        </el-select>
+        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEPICKER" v-model="value"
+            type="daterange" unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期" />
+    </div>
 </template>
