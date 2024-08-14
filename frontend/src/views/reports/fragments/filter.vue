@@ -27,6 +27,44 @@ watch(value, (newVal) => {
     emits("filter", props.fragment.trait, newVal)
 })
 
+const shortcuts = [
+    {
+        text: '过去一周',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            return [start, end]
+        },
+    },
+    {
+        text: '过去一个月',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            return [start, end]
+        },
+    },
+    {
+        text: '过去三个月',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            return [start, end]
+        },
+    },
+    {
+        text: '过去一年',
+        value: () => {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+            return [start, end]
+        },
+    },
+]
 </script>
 <template>
     <div>
@@ -35,6 +73,7 @@ watch(value, (newVal) => {
             <el-option v-for="item in props.fragment.values" :key="item" :label="item" :value="item" />
         </el-select>
         <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEPICKER" v-model="value"
-            type="daterange" unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期" />
+            type="daterange" unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期"
+            :shortcuts="shortcuts" />
     </div>
 </template>
