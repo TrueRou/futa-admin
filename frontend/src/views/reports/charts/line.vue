@@ -16,6 +16,9 @@ const option = computed(() => {
     return {
         xAxis: {
             type: 'category',
+            axisTick: {
+                alignWithLabel: true
+            },
             data: props.report.data.map((row) => row[0]),
         },
         yAxis: {
