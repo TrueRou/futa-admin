@@ -83,6 +83,14 @@ class ReportFragment(SQLModel, table=True):
     values: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
 
 
+class ReportMixin(SQLModel, table=True):
+    __tablename__ = "def_report_mixins"
+
+    report_id: int = Field(foreign_key="def_reports.id", primary_key=True)
+    ref_variable: str = Field(default="option", primary_key=True)
+    values: dict = Field()
+
+
 class ReportFieldPublic(SQLModel):
     name: str
     field_pos: int
@@ -97,6 +105,11 @@ class ReportFragmentPublic(SQLModel):
     values: list[str] | None
 
 
+class ReportMixinPublic(SQLModel):
+    ref_variable: str
+    values: dict
+
+
 class ReportSimple(SQLModel):
     id: int
     name: str
@@ -109,4 +122,5 @@ class ReportPublic(SQLModel):
     type: ReportType = Field(default=ReportType.FORM)
     fields: list[ReportFieldPublic]
     fragments: list[ReportFragmentPublic]
+    mixins: list[ReportMixinPublic]
     data: list[tuple]  # this will be the data returned from the table query
