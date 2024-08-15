@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ReportType, type ReportFull } from '@/types';
 import axios from 'axios';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, type Ref } from 'vue';
 import ReportTable from './tables/table.vue';
 import ReportChartLine from './charts/line.vue';
 import ReportFilter from './fragments/filter.vue';

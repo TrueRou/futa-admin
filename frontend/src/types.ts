@@ -35,9 +35,15 @@ interface ReportFragment {
     values: string[] | null;
 }
 
+interface ReportMixin {
+    ref_variable: string;
+    values: Record<string, any>;
+}
+
 interface ReportFull extends ReportSimple {
     fields: ReportField[];
     fragments: ReportFragment[];
+    mixins: ReportMixin[];
     data: (string | number)[][];
 }
 

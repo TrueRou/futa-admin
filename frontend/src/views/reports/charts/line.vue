@@ -2,18 +2,22 @@
 import { type ReportFull } from '@/types';
 import VChart from 'vue-echarts';
 import 'echarts';
-import { computed } from 'vue';
+import { ref, watch, type Ref } from 'vue';
+import { deepMergeDict } from '@/utils';
 
 const props = defineProps<{
-    report: ReportFull
+    report: ReportFull,
 }>()
 
 const emits = defineEmits<{
     update: []
 }>()
 
-const option = computed(() => {
-    return {
+const option = ref({})
+
+const updateOption = () => {
+    const mixin = props.report.mixins.find((mixin) => mixin.ref_variable == 'option')
+    var optionValue: Record<string, any> = {
         xAxis: {
             type: 'category',
             axisTick: {
@@ -32,9 +36,9 @@ const option = computed(() => {
         },
         grid: {
             top: '40px',
-            bottom: '20px',
-            left: '40px',
-            right: '0px'
+            bottom: '60px',
+            left: '80px',
+            right: '40px'
         },
         series: props.report.fields.map((field, index) => {
             return {
@@ -43,9 +47,14 @@ const option = computed(() => {
                 data: props.report.data.map((row) => row[index]),
             }
         })
-    };
-})
+    }
+    // Apply merge with mixin
+    if (mixin != null) optionValue = deepMergeDict(optionValue, mixin.values)
+    option.value = optionValue
+}
+
+watch(() => props.report, updateOption, { immediate: true, deep: true })
 </script>
 <template>
-    <v-chart class="h-80" :option="option" autoresize></v-chart>
+    <v-chart class="mt-4 h-80" :option="option" autoresize></v-chart>
 </template>
