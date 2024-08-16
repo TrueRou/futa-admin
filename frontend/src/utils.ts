@@ -13,4 +13,18 @@ const deepMergeDict = (source: Record<string, any>, mixins: Record<string, any>)
     return source;
 }
 
-export { deepMergeDict };
+const removeCommonPrefix = (arr: any[]) => {
+    const commonPrefix = arr.reduce((prefix, str) => {
+        let i = 0;
+        while (i < prefix.length && i < str.length && prefix[i] === str[i]) {
+            i++;
+        }
+        return prefix.slice(0, i);
+    }, arr[0]);
+
+    console.log('commonPrefix', commonPrefix);
+
+    return arr.map(str => str.replace(commonPrefix, ''));
+}
+
+export { deepMergeDict, removeCommonPrefix };

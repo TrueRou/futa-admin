@@ -13,6 +13,11 @@ const emits = defineEmits<{
     filter: [source: string, value: string]
 }>()
 
+if (props.fragment.type == ReportFragmentType.FILTER_DATESINGLE) {
+    // set default value to today
+    value.value = new Date()
+}
+
 const toDate = (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
@@ -26,11 +31,11 @@ watch(value, (newVal) => {
     }
     if (props.fragment.type == ReportFragmentType.FILTER_DATESINGLE) {
         const nextDay = new Date()
-        nextDay.setTime(newVal.getTime() + 3600 * 1000 * 24)
+        if (newVal) nextDay.setTime(newVal.getTime() + 3600 * 1000 * 24)
         newVal = newVal ? toDate(newVal) + "," + toDate(nextDay) : null
     }
     emits("filter", props.fragment.trait, newVal)
-})
+}, { immediate: true })
 
 const rangeShortcuts = [
     {

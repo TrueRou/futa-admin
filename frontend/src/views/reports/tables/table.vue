@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ReportFieldType, type ReportField, type ReportFull } from '@/types';
+import { removeCommonPrefix } from '@/utils';
 import axios from 'axios';
 import qs from 'qs';
 import { computed, nextTick, ref } from 'vue';
@@ -15,16 +16,30 @@ const emits = defineEmits<{
 const tableRowEditIndex = ref(-1);
 const tableColumnEditIndex = ref(-1);
 const tableRowInputRef: any = ref(null);
+const navCols = ref<(string | number)[]>([]);
+const showTable = ref(false);
 
+// to prohibit the table from showing before the data is ready
+setTimeout(() => {
+    showTable.value = true;
+}, 200);
 
 const tableData = computed(() => {
-    return props.report.data.map((row) => {
+    var flatted = props.report.data.map((row) => {
         const rowData: Record<string, string | number> = {};
         props.report.fields.forEach((field, index) => {
             rowData[field.name] = row[index];
         });
         return rowData;
     });
+    var firstCols = flatted.map((row) => Object.values(row)[0]);
+    navCols.value = firstCols; // for update field
+    if (firstCols.length > 1) firstCols = removeCommonPrefix(firstCols);
+    flatted.forEach((row, index) => {
+        row[Object.keys(row)[0]] = firstCols[index];
+    });
+
+    return flatted;
 });
 
 const findWidth = (field: ReportField) => {
@@ -50,7 +65,7 @@ const onInputTableBlur = async (scope: any) => {
     tableColumnEditIndex.value = -1
     const navField = props.report.fields.find(field => field.name == Object.keys(scope.row)[0])!
     const upsertField = props.report.fields.find(field => field.name == scope.column.property)!
-    const navValue = scope.row[Object.keys(scope.row)[0]]
+    const navValue = navCols.value[scope.$index]
     const value = scope.row[scope.column.property]
 
     await axios.patch(`/reports/${props.report.id}?` + qs.stringify({
@@ -65,7 +80,7 @@ const onInputTableBlur = async (scope: any) => {
 
 </script>
 <template>
-    <el-table :data="tableData" class="w-full" :max-height="400" stripe>
+    <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="400" stripe>
         <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name"
             :min-width="findWidth(field)">
             <template #header>
