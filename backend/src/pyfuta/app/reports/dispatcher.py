@@ -16,7 +16,7 @@ async def dispatch_statement(statement: str, parameters: dict, session: Session,
                 # replace the trait with the named fragment parameters.
                 fragment = frag.sql.replace("${value}", f":{trait}")
                 statement = statement.replace("$ { " + trait + " }", fragment)
-                sql_parameters = parameters
+                sql_parameters[trait] = parameters[trait]
             elif frag.type in [ReportFragmentType.FILTER_DATERANGE, ReportFragmentType.FILTER_DATESINGLE]:
                 for index, value in enumerate(parameters[trait].split(",")):
                     fragment = fragment.replace("${value" + str(index) + "}", f":{trait + str(index)}")
