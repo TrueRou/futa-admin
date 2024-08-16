@@ -32,6 +32,9 @@ class Fragment:
     def __init__(self, trait: str, sql: str, name: str, type: ReportFragmentType, values: list[str] = None):
         self.fragment = ReportFragment(trait=trait, sql=sql, name=name, type=type, values=",".join(values) if values else None)
 
+    def copy(self):
+        return Fragment(self.fragment.trait, self.fragment.sql, self.fragment.name, self.fragment.type, self.fragment.values)
+
 
 class Mixin:
     def __init__(self, ref_variable: str, values: str):

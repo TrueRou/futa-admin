@@ -33,7 +33,9 @@ const findWidth = (field: ReportField) => {
 
 const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.name === scope.column.property)!
+    const navValue = scope.row[Object.keys(scope.row)[0]]
     if (field.field_name == null) return
+    if (navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
     tableColumnEditIndex.value = scope.column.id
@@ -63,7 +65,7 @@ const onInputTableBlur = async (scope: any) => {
 
 </script>
 <template>
-    <el-table :data="tableData" class="w-full" :max-height="400" stripe show-summary>
+    <el-table :data="tableData" class="w-full" :max-height="400" stripe>
         <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name"
             :min-width="findWidth(field)">
             <template #header>
