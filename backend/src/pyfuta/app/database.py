@@ -1,6 +1,4 @@
 import contextlib
-import os
-from pathlib import Path
 from fastapi import Request
 from sqlalchemy import text
 from sqlmodel import create_engine, Session

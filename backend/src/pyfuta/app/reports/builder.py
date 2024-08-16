@@ -29,11 +29,14 @@ class DateTime(Field):
 
 
 class Fragment:
-    def __init__(self, trait: str, sql: str, name: str, type: ReportFragmentType, values: list[str] = None):
-        self.fragment = ReportFragment(trait=trait, sql=sql, name=name, type=type, values=",".join(values) if values else None)
-
-    def copy(self):
-        return Fragment(self.fragment.trait, self.fragment.sql, self.fragment.name, self.fragment.type, self.fragment.values)
+    def __init__(self, trait: str, sql: str, name: str, type: ReportFragmentType, values: list[tuple[str]] = []):
+        self.fragment: ReportFragment
+        self.trait = trait
+        self.sql = sql
+        self.name = name
+        self.type = type
+        self.labels = ",".join([value[0] for value in values])
+        self.values = ",".join([value[1] for value in values])
 
 
 class Mixin:
@@ -48,7 +51,7 @@ class ReportBuilder:
         self.field_pos: int = 0
         self.report_id: int = -1
         self.report_fields: list[ReportField] = []
-        self.report_fragments: list[ReportFragment] = []
+        self.report_fragments: list[Fragment] = []
         self.report_mixins: list[ReportMixin] = []
         metadata.append(self)
 
@@ -67,7 +70,7 @@ class ReportBuilder:
 
     def fragments(self, *fragments: Fragment):
         for fragment in fragments:
-            self.report_fragments.append(fragment.fragment)
+            self.report_fragments.append(fragment)
         return self
 
     def mixins(self, *mixins: Mixin):
@@ -89,12 +92,12 @@ class Metadata(list[ReportBuilder]):
                 for field in builder.report_fields:
                     field.report_id = builder.report.id
                 for fragment in builder.report_fragments:
-                    fragment.report_id = builder.report.id
+                    fragment.fragment = ReportFragment(report_id=builder.report.id, **fragment.__dict__)
                 for mixin in builder.report_mixins:
                     mixin.report_id = builder.report.id
                 session.add_all(builder.report_fields)
-                session.add_all(builder.report_fragments)
                 session.add_all(builder.report_mixins)
+                session.add_all([fragment.fragment for fragment in builder.report_fragments])
 
             await session.commit()  # Apply the changes to all the transactions.
 

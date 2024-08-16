@@ -7,7 +7,8 @@ enum ReportType {
 
 enum ReportFragmentType {
     FILTER_SELECT = 1,
-    FILTER_DATEPICKER = 2
+    FILTER_DATERANGE = 2,
+    FILTER_DATESINGLE = 3
 }
 
 enum ReportFieldType {
@@ -32,7 +33,8 @@ interface ReportFragment {
     trait: string;
     name: string;
     type: ReportFragmentType;
-    values: string[] | null;
+    labels: string[];
+    values: string[];
 }
 
 interface ReportMixin {

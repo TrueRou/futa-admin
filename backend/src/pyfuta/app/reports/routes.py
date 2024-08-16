@@ -40,7 +40,7 @@ async def get_report(
     fragments = {k: v for k, v in fragments.items() if v is not None}
     data = await dispatcher.dispatch_statement(report.sql, fragments, session, report.id)
     frags = [
-        ReportFragmentPublic(**frag.model_dump(exclude=["values"]), values=frag.values.split(",") if frag.values is not None else None)
+        ReportFragmentPublic(**frag.model_dump(exclude=["values", "labels"]), values=frag.values.split(","), labels=frag.labels.split(","))
         for frag in session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
     ]
     mixins = session.exec(select(ReportMixin).where(ReportMixin.report_id == report.id))

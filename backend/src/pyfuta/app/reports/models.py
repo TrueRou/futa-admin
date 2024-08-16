@@ -18,7 +18,8 @@ class ReportType(IntEnum):
 class ReportFragmentType(IntEnum):
     # FILTER: from 1 to 10 (this is quite arbitrary, maybe we can change it later)
     FILTER_SELECT = 1
-    FILTER_DATEPICKER = 2
+    FILTER_DATERANGE = 2
+    FILTER_DATESINGLE = 3
 
 
 class ReportFieldType(IntEnum):
@@ -80,6 +81,7 @@ class ReportFragment(SQLModel, table=True):
     sql: str
     name: str
     type: ReportFragmentType = Field(default=ReportFragmentType.FILTER_SELECT)
+    labels: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
     values: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
 
 
@@ -102,7 +104,8 @@ class ReportFragmentPublic(SQLModel):
     trait: str
     name: str
     type: ReportFragmentType
-    values: list[str] | None
+    labels: list[str]
+    values: list[str]
 
 
 class ReportMixinPublic(SQLModel):

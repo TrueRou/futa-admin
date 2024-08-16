@@ -21,13 +21,18 @@ const toDate = (date: Date) => {
 }
 
 watch(value, (newVal) => {
-    if (props.fragment.type == ReportFragmentType.FILTER_DATEPICKER) {
+    if (props.fragment.type == ReportFragmentType.FILTER_DATERANGE) {
         newVal = newVal ? toDate(newVal[0]) + "," + toDate(newVal[1]) : null
+    }
+    if (props.fragment.type == ReportFragmentType.FILTER_DATESINGLE) {
+        const nextDay = new Date()
+        nextDay.setTime(newVal.getTime() + 3600 * 1000 * 24)
+        newVal = newVal ? toDate(newVal) + "," + toDate(nextDay) : null
     }
     emits("filter", props.fragment.trait, newVal)
 })
 
-const shortcuts = [
+const rangeShortcuts = [
     {
         text: '过去一周',
         value: () => {
@@ -65,15 +70,33 @@ const shortcuts = [
         },
     },
 ]
+
+const singleShortcuts = [
+    {
+        text: '今天',
+        value: new Date(),
+    },
+    {
+        text: '昨天',
+        value: () => {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            return date
+        },
+    },
+]
 </script>
 <template>
     <div>
         <el-select v-if="props.fragment.type == ReportFragmentType.FILTER_SELECT" style="width: 160px;" v-model="value"
-            :placeholder="'筛选 ' + props.fragment.name" size="large" clearable>
-            <el-option v-for="item in props.fragment.values" :key="item" :label="item" :value="item" />
+            :placeholder="'筛选 ' + props.fragment.name" clearable>
+            <el-option v-for="label, index in props.fragment.labels" :key="label" :label="label"
+                :value="props.fragment.values[index]" />
         </el-select>
-        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEPICKER" v-model="value"
+        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATERANGE" v-model="value"
             type="daterange" unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期"
-            :shortcuts="shortcuts" />
+            :shortcuts="rangeShortcuts" />
+        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATESINGLE" v-model="value" type="date"
+            :placeholder="'筛选 ' + props.fragment.name" :shortcuts="singleShortcuts" />
     </div>
 </template>
