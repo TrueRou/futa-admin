@@ -13,9 +13,17 @@ const emits = defineEmits<{
     filter: [source: string, value: string]
 }>()
 
-if (props.fragment.type == ReportFragmentType.FILTER_DATESINGLE) {
-    // set default value to today
-    value.value = new Date()
+if (props.fragment.type == ReportFragmentType.FILTER_DATEDAY) {
+    const date = new Date()
+    date.setHours(0, 0, 0, 0)
+    value.value = date
+}
+
+if (props.fragment.type == ReportFragmentType.FILTER_DATEMONTH) {
+    const date = new Date()
+    date.setDate(0)
+    date.setHours(0, 0, 0, 0)
+    value.value = date
 }
 
 const toDate = (date: Date) => {
@@ -29,10 +37,18 @@ watch(value, (newVal) => {
     if (props.fragment.type == ReportFragmentType.FILTER_DATERANGE) {
         newVal = newVal ? toDate(newVal[0]) + "," + toDate(newVal[1]) : null
     }
-    if (props.fragment.type == ReportFragmentType.FILTER_DATESINGLE) {
+    if (props.fragment.type == ReportFragmentType.FILTER_DATEDAY) {
         const nextDay = new Date()
         if (newVal) nextDay.setTime(newVal.getTime() + 3600 * 1000 * 24)
         newVal = newVal ? toDate(newVal) + "," + toDate(nextDay) : null
+    }
+    if (props.fragment.type == ReportFragmentType.FILTER_DATEMONTH) {
+        if (!newVal) return
+        const thisMonth = new Date(newVal)
+        thisMonth.setDate(0)
+        const nextMonth = new Date(thisMonth)
+        nextMonth.setMonth(thisMonth.getMonth() + 1)
+        newVal = toDate(thisMonth) + "," + toDate(nextMonth)
     }
     emits("filter", props.fragment.trait, newVal)
 }, { immediate: true })
@@ -76,17 +92,43 @@ const rangeShortcuts = [
     },
 ]
 
-const singleShortcuts = [
+const dayShortcuts = [
     {
         text: '今天',
-        value: new Date(),
+        value: () => {
+            const date = new Date()
+            date.setHours(0, 0, 0, 0)
+            return date
+        },
     },
     {
         text: '昨天',
         value: () => {
             const date = new Date()
+            date.setHours(0, 0, 0, 0)
             date.setTime(date.getTime() - 3600 * 1000 * 24)
             return date
+        },
+    },
+]
+
+const monthShortcuts = [
+    {
+        text: '本月',
+        value: () => {
+            const date = new Date()
+            date.setDate(0)
+            date.setHours(0, 0, 0, 0)
+            return date
+        },
+    },
+    {
+        text: '上月',
+        value: () => {
+            var date = new Date()
+            date = new Date(date.getFullYear(), date.getMonth() - 1, 0)
+            date.setHours(0, 0, 0, 0)
+            return
         },
     },
 ]
@@ -101,7 +143,9 @@ const singleShortcuts = [
         <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATERANGE" v-model="value"
             type="daterange" unlink-panels range-separator="到" start-placeholder="起始日期" end-placeholder="终止日期"
             :shortcuts="rangeShortcuts" />
-        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATESINGLE" v-model="value" type="date"
-            :placeholder="'筛选 ' + props.fragment.name" :shortcuts="singleShortcuts" />
+        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEDAY" v-model="value" type="date"
+            :placeholder="'筛选 ' + props.fragment.name" :shortcuts="dayShortcuts" />
+        <el-date-picker v-if="props.fragment.type == ReportFragmentType.FILTER_DATEMONTH" v-model="value" type="month"
+            :placeholder="'筛选 ' + props.fragment.name" :shortcuts="monthShortcuts" />
     </div>
 </template>

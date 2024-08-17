@@ -8,7 +8,8 @@ enum ReportType {
 enum ReportFragmentType {
     FILTER_SELECT = 1,
     FILTER_DATERANGE = 2,
-    FILTER_DATESINGLE = 3
+    FILTER_DATEDAY = 3,
+    FILTER_DATEMONTH = 4,
 }
 
 enum ReportFieldType {

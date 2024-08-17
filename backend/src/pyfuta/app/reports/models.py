@@ -19,7 +19,8 @@ class ReportFragmentType(IntEnum):
     # FILTER: from 1 to 10 (this is quite arbitrary, maybe we can change it later)
     FILTER_SELECT = 1
     FILTER_DATERANGE = 2
-    FILTER_DATESINGLE = 3
+    FILTER_DATEDAY = 3
+    FILTER_DATEMONTH = 4
 
 
 class ReportFieldType(IntEnum):
