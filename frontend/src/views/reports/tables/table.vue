@@ -34,7 +34,7 @@ const tableData = computed(() => {
     });
     var firstCols = flatted.map((row) => Object.values(row)[0]);
     navCols.value = firstCols; // for update field
-    if (firstCols.length > 1) firstCols = removeCommonPrefix(firstCols);
+    if (firstCols.length > 1 && !props.report.fields[0].is_fixed) firstCols = removeCommonPrefix(firstCols);
     flatted.forEach((row, index) => {
         row[Object.keys(row)[0]] = firstCols[index];
     });
@@ -42,14 +42,10 @@ const tableData = computed(() => {
     return flatted;
 });
 
-const findWidth = (field: ReportField) => {
-    return field.type == ReportFieldType.NUMBER ? '60' : '120';
-}
-
 const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.name === scope.column.property)!
     const navValue = scope.row[Object.keys(scope.row)[0]]
-    if (field.field_name == null) return
+    if (field.field_name == null || field.field_pos == 0) return
     if (navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
@@ -81,8 +77,7 @@ const onInputTableBlur = async (scope: any) => {
 </script>
 <template>
     <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="400" stripe>
-        <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name"
-            :min-width="findWidth(field)">
+        <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name" :min-width="60">
             <template #header>
                 <el-icon v-if="field.field_name != null && field.field_pos != 0">
                     <EditPen />

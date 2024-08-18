@@ -6,13 +6,13 @@ from sqlmodel import SQLModel
 
 
 class Field:
-    def __init__(self, name: str, field_name: str = None, pk: bool = False):
-        self.field = ReportField(name=name, field_name=field_name, is_primary_key=pk)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False):
+        self.field = ReportField(name=name, field_name=field_name, is_primary_key=pk, is_fixed=fixed)
 
 
 class Text(Field):
-    def __init__(self, name: str, field_name: str = None, pk: bool = False):
-        super().__init__(name, field_name, pk)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False):
+        super().__init__(name, field_name, pk, fixed)
         self.field.type = ReportFieldType.TEXT
 
 

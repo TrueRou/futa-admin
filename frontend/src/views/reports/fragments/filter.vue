@@ -47,7 +47,7 @@ watch(value, (newVal) => {
         const thisMonth = new Date(newVal)
         thisMonth.setDate(0)
         const nextMonth = new Date(thisMonth)
-        nextMonth.setMonth(thisMonth.getMonth() + 1)
+        nextMonth.setMonth(thisMonth.getMonth() + 2, 0)
         newVal = toDate(thisMonth) + "," + toDate(nextMonth)
     }
     emits("filter", props.fragment.trait, newVal)
@@ -126,9 +126,9 @@ const monthShortcuts = [
         text: '上月',
         value: () => {
             var date = new Date()
-            date = new Date(date.getFullYear(), date.getMonth() - 1, 0)
             date.setHours(0, 0, 0, 0)
-            return
+            date.setMonth(date.getMonth() - 1, 0)
+            return date
         },
     },
 ]

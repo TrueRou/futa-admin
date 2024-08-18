@@ -22,8 +22,6 @@ const removeCommonPrefix = (arr: any[]) => {
         return prefix.slice(0, i);
     }, arr[0]);
 
-    console.log('commonPrefix', commonPrefix);
-
     return arr.map(str => str.replace(commonPrefix, ''));
 }
 

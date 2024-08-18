@@ -27,7 +27,8 @@ interface ReportField {
     name: string;
     type: ReportFieldType;
     field_name: string | null;
-    field_pos: number
+    field_pos: number;
+    is_fixed: boolean;
 }
 
 interface ReportFragment {
