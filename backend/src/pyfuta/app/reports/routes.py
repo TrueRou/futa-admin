@@ -44,6 +44,7 @@ async def get_report(
         for frag in session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
     ]
     mixins = session.exec(select(ReportMixin).where(ReportMixin.report_id == report.id))
+    mixins = await dispatcher.sideload_mixins(mixins)
     return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=frags, mixins=mixins)
 
 

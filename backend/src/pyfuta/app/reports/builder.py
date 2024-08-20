@@ -40,9 +40,9 @@ class Fragment:
 
 
 class Mixin:
-    def __init__(self, ref_variable: str, values: str):
+    def __init__(self, ref_variable: str, values: str, sideload_sql: str = None):
         dictionary = json.loads(values)  # Ensure it is a valid json
-        self.mixin = ReportMixin(ref_variable=ref_variable, values=dictionary)
+        self.mixin = ReportMixin(ref_variable=ref_variable, values=dictionary, sideload_sql=sideload_sql)
 
 
 class ReportBuilder:

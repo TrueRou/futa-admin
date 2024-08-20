@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import IntEnum, auto
 from typing import Any
-from sqlalchemy import DateTime, Float, String
+from sqlalchemy import JSON, Column, DateTime, Float, String
 from sqlmodel import Field, SQLModel
 
 metadata = SQLModel.metadata
@@ -92,7 +92,8 @@ class ReportMixin(SQLModel, table=True):
 
     report_id: int = Field(foreign_key="def_reports.id", primary_key=True)
     ref_variable: str = Field(default="option", primary_key=True)
-    values: dict = Field()
+    values: dict = Field(sa_column=Column(JSON), default_factory=dict)
+    sideload_sql: str | None = Field(default=None)
 
 
 class ReportFieldPublic(SQLModel):
