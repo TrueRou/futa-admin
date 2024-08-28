@@ -106,7 +106,8 @@ watch(() => props.stamp, fetchReports, { immediate: true })
             <div class="flex flex-col">
                 <div class="flex items-center justify-between">
                     <span class="font-semibold flex">{{ report?.name }}</span>
-                    <el-button class="mr-2" type="primary" @click="newRowDialogVisible = true">添加</el-button>
+                    <el-button v-if="report?.is_editable" class="mr-2" type="primary"
+                        @click="newRowDialogVisible = true">添加</el-button>
                 </div>
 
                 <template v-for="(_, index) in fragmentDefs.length">
