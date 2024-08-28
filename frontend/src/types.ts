@@ -45,6 +45,7 @@ interface ReportMixin {
 }
 
 interface ReportFull extends ReportSimple {
+    is_editable: boolean;
     fields: ReportField[];
     fragments: ReportFragment[];
     mixins: ReportMixin[];

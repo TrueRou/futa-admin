@@ -58,6 +58,7 @@ class Report(SQLModel, table=True):
     sql: str
     type: ReportType = Field(default=ReportType.FORM)
     table_name: str | None = Field(default=None)
+    is_editable: bool = Field(default=False)
 
 
 class ReportField(SQLModel, table=True):
@@ -127,6 +128,7 @@ class ReportPublic(SQLModel):
     id: int
     name: str
     type: ReportType = Field(default=ReportType.FORM)
+    is_editable: bool
     fields: list[ReportFieldPublic]
     fragments: list[ReportFragmentPublic]
     mixins: list[ReportMixinPublic]

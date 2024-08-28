@@ -21,6 +21,9 @@ const reports = ref<{ [key: string]: ReportFull }>({})
 const fragmentDefs = ref<string[]>(["条件组1"])
 const fragmentSets = ref<[{ [key: string]: string }]>([{}])
 
+const newRowDialogVisible = ref(false)
+const newRowForm = ref<Record<string, any>>({})
+
 const fetchReports = async () => {
     for (const [index, fragmentDef] of fragmentDefs.value.entries()) {
         const response = await axios.post(`/reports/${props.ident}`, fragmentSets.value[index])
@@ -80,6 +83,13 @@ const updateFragment = async (index: number, source: string, value: string) => {
     await fetchReports()
 }
 
+const newRow = async () => {
+    await axios.post(`/reports/${report.value?.id}/rows`, newRowForm.value)
+    newRowDialogVisible.value = false
+    newRowForm.value = {}
+    await fetchReports()
+}
+
 const allowFragmentSets = computed(() => {
     const values = Object.values(reports.value)
     const firstElement = values[0]
@@ -93,23 +103,42 @@ watch(() => props.stamp, fetchReports, { immediate: true })
 <template>
     <el-card class="mt-4" shadow="hover">
         <template #header>
-            <span class="font-semibold">{{ report?.name }}</span>
-            <template v-for="(_, index) in fragmentDefs.length">
-                <div class="mt-4 flex" v-if="report?.fragments.length != 0">
-                    <template v-for="fragment in report?.fragments">
-                        <ReportFilter class="mr-2" v-if="fragment.type < 10" :fragment="fragment"
-                            @filter="(source, value) => updateFragment(index, source, value)">
-                        </ReportFilter>
-                    </template>
-                    <el-button class="mr-2" :icon="Minus" type="danger"
-                        v-if="allowFragmentSets && index == fragmentDefs.length - 1 && index != 0"
-                        @click="removeFragment(index)" />
-                    <el-button class="mr-2" :icon="Plus" type="primary"
-                        v-if="allowFragmentSets && index == fragmentDefs.length - 1" @click="insertFragment" />
+            <div class="flex flex-col">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold flex">{{ report?.name }}</span>
+                    <el-button class="mr-2" type="primary" @click="newRowDialogVisible = true">添加</el-button>
                 </div>
-            </template>
+
+                <template v-for="(_, index) in fragmentDefs.length">
+                    <div class="mt-4 flex" v-if="report?.fragments.length != 0">
+                        <template v-for="fragment in report?.fragments">
+                            <ReportFilter class="mr-2" v-if="fragment.type < 10" :fragment="fragment"
+                                @filter="(source, value) => updateFragment(index, source, value)">
+                            </ReportFilter>
+                        </template>
+                        <el-button class="mr-2" :icon="Minus" type="danger"
+                            v-if="allowFragmentSets && index == fragmentDefs.length - 1 && index != 0"
+                            @click="removeFragment(index)" />
+                        <el-button class="mr-2" :icon="Plus" type="primary"
+                            v-if="allowFragmentSets && index == fragmentDefs.length - 1" @click="insertFragment" />
+                    </div>
+                </template>
+            </div>
         </template>
         <ReportTable v-if="report?.type == ReportType.FORM" :report="report" @updateStamp="emits('updateStamp')" />
         <ReportChartLine v-else-if="report?.type == ReportType.LINE_CHART" :report="report" />
     </el-card>
+    <el-dialog v-model="newRowDialogVisible" title="添加条目" width="500">
+        <el-form label-width="auto">
+            <el-form-item v-for="field in report?.fields.filter(f => f.field_name)" :label="field.name">
+                <el-input v-model="newRowForm[field.field_name!]" autocomplete="off" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <div class="dialog-footer">
+                <el-button @click="newRowDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="newRow">确认</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </template>

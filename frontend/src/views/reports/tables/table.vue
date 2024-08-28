@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ReportFieldType, type ReportField, type ReportFull } from '@/types';
+import { type ReportField, type ReportFull } from '@/types';
 import { removeCommonPrefix } from '@/utils';
 import axios from 'axios';
 import qs from 'qs';
@@ -74,6 +74,16 @@ const onInputTableBlur = async (scope: any) => {
     emits('updateStamp') // update all the reports data in the current page.
 }
 
+const deleteRow = async (scope: any) => {
+    const navValue = navCols.value[scope.$index]
+
+    await axios.delete(`/reports/${props.report.id}/rows?` + qs.stringify({
+        primary_key_value: navValue,
+    }))
+
+    emits('updateStamp') // update all the reports data in the current page.
+}
+
 </script>
 <template>
     <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="400" stripe>
@@ -93,6 +103,13 @@ const onInputTableBlur = async (scope: any) => {
                         {{ scope.row[scope.column.property] }}
                     </p>
                 </div>
+            </template>
+        </el-table-column>
+        <el-table-column v-if="report.is_editable" width="100" fixed="right" label="操作">
+            <template #default="scope">
+                <el-button type="danger" @click="deleteRow(scope)">
+                    删除
+                </el-button>
             </template>
         </el-table-column>
     </el-table>

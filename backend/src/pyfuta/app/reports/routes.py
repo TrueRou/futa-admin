@@ -66,3 +66,34 @@ async def patch_report(
     value = field.type.parse(value)
     nav_value = nav_field.type.parse(nav_value)
     await dispatcher.dispatch_updating(report.table_name, field.field_name, nav_field.field_name, value, nav_value)
+
+
+@router.post("/{report_id}/rows")
+async def create_row(
+    data: dict[str, str],
+    report: Report = Depends(require_report),
+    session: Session = Depends(require_session),
+):
+    if report.table_name is None:
+        raise HTTPException(status_code=404, detail="Report is not bound to a table")
+    for key in data.keys():
+        field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.field_name == key)).first()
+        if field is None:
+            raise HTTPException(status_code=404, detail=f"Field not found: {key}")
+        data[key] = field.type.parse(data[key])
+    await dispatcher.dispatch_inserting(report.table_name, data)
+
+
+@router.delete("/{report_id}/rows")
+async def delete_row(
+    primary_key_value: str,
+    report: Report = Depends(require_report),
+    session: Session = Depends(require_session),
+):
+    if report.table_name is None:
+        raise HTTPException(status_code=404, detail="Report is not bound to a table")
+    pk_field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.is_primary_key == True)).first()
+    if pk_field is None:
+        raise HTTPException(status_code=404, detail="Primary key not found for report")
+    pk_value = pk_field.type.parse(primary_key_value)
+    await dispatcher.dispatch_deleting(report.table_name, pk_field.field_name, pk_value)
