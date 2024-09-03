@@ -87,24 +87,27 @@ const deleteRow = async (scope: any) => {
 </script>
 <template>
     <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="400" stripe>
-        <el-table-column v-for="field in report.fields" :prop="field.name" :label="field.name" :min-width="60">
-            <template #header>
-                <el-icon v-if="field.field_name != null && field.field_pos != 0">
-                    <EditPen />
-                </el-icon>
-                {{ field.name }}
-            </template>
-            <template #default="scope">
-                <el-input v-if="tableRowEditIndex === scope.$index && tableColumnEditIndex == scope.column.id"
-                    ref="tableRowInputRef" v-model="scope.row[scope.column.property]" @blur="onInputTableBlur(scope)"
-                    @keyup.enter="(e: any) => e.target.blur()" />
-                <div v-else class=" h-8" @dblclick="dbClickCell(scope)">
-                    <p>
-                        {{ scope.row[scope.column.property] }}
-                    </p>
-                </div>
-            </template>
-        </el-table-column>
+        <template v-for="field in report.fields">
+            <el-table-column :key="field.name" v-if="!report.updateable_fields_only || field.field_name"
+                :prop="field.name" :label="field.name" :min-width="60">
+                <template #header>
+                    <el-icon v-if="field.field_name != null && field.field_pos != 0">
+                        <EditPen />
+                    </el-icon>
+                    {{ field.name }}
+                </template>
+                <template #default="scope">
+                    <el-input v-if="tableRowEditIndex === scope.$index && tableColumnEditIndex == scope.column.id"
+                        ref="tableRowInputRef" v-model="scope.row[scope.column.property]"
+                        @blur="onInputTableBlur(scope)" @keyup.enter="(e: any) => e.target.blur()" />
+                    <div v-else class=" h-8" @dblclick="dbClickCell(scope)">
+                        <p>
+                            {{ scope.row[scope.column.property] }}
+                        </p>
+                    </div>
+                </template>
+            </el-table-column>
+        </template>
         <el-table-column v-if="report.is_editable" width="100" fixed="right" label="操作">
             <template #default="scope">
                 <el-button type="danger" @click="deleteRow(scope)">

@@ -46,8 +46,8 @@ class Mixin:
 
 
 class ReportBuilder:
-    def __init__(self, name: str, sql: str, table_name: str = None, is_editable: bool = False):
-        self.report = Report(name=name, sql=sql, table_name=table_name, is_editable=is_editable)
+    def __init__(self, name: str, sql: str, table_name: str = None, is_editable: bool = False, updateable_fields_only: bool = False):
+        self.report = Report(name=name, sql=sql, table_name=table_name, is_editable=is_editable, updateable_fields_only=updateable_fields_only)
         self.field_pos: int = 0
         self.report_id: int = -1
         self.report_fields: list[ReportField] = []
