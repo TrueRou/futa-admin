@@ -16,7 +16,7 @@ const deepMergeDict = (source: Record<string, any>, mixins: Record<string, any>)
 const removeCommonPrefix = (arr: any[]) => {
     const commonPrefix = arr.reduce((prefix, str) => {
         let i = 0;
-        while (i < prefix.length && i < str.length && prefix[i] === str[i]) {
+        while (i < prefix.length && i < str.length && prefix[i] === str[i] && prefix[i] !== ' ') {
             i++;
         }
         return prefix.slice(0, i);
