@@ -6,25 +6,25 @@ from sqlmodel import SQLModel
 
 
 class Field:
-    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False):
-        self.field = ReportField(name=name, field_name=field_name, is_primary_key=pk, is_fixed=fixed)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False, width: int = None):
+        self.field = ReportField(name=name, field_name=field_name, is_primary_key=pk, is_fixed=fixed, width=width)
 
 
 class Text(Field):
-    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False):
-        super().__init__(name, field_name, pk, fixed)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False, width: int = None):
+        super().__init__(name, field_name, pk, fixed, width)
         self.field.type = ReportFieldType.TEXT
 
 
 class Number(Field):
-    def __init__(self, name: str, field_name: str = None, pk: bool = False):
-        super().__init__(name, field_name, pk)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False, width: int = None):
+        super().__init__(name, field_name, pk, fixed, width)
         self.field.type = ReportFieldType.NUMBER
 
 
 class DateTime(Field):
-    def __init__(self, name: str, field_name: str = None, pk: bool = False):
-        super().__init__(name, field_name, pk)
+    def __init__(self, name: str, field_name: str = None, pk: bool = False, fixed: bool = False, width: int = None):
+        super().__init__(name, field_name, pk, fixed, width)
         self.field.type = ReportFieldType.DATETIME
 
 

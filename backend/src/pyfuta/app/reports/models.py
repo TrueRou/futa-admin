@@ -72,6 +72,7 @@ class ReportField(SQLModel, table=True):
     field_name: str | None = Field(default=None)
     is_primary_key: bool = Field(default=False)
     is_fixed: bool = Field(default=False)
+    width: int | None = Field(default=None)
 
     def to_column(self):
         return
@@ -104,6 +105,7 @@ class ReportFieldPublic(SQLModel):
     type: ReportFieldType
     field_name: str | None
     is_fixed: bool
+    width: int | None
 
 
 class ReportFragmentPublic(SQLModel):

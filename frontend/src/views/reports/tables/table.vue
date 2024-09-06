@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { type ReportField, type ReportFull } from '@/types';
+import { useSession } from '@/store/session';
+import { type ReportFull } from '@/types';
 import { removeCommonPrefix } from '@/utils';
 import axios from 'axios';
 import qs from 'qs';
 import { computed, nextTick, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+const session = useSession()
+const page = session.pages.find((page) => page.path === route.params.path)!
 
 const props = defineProps<{
     report: ReportFull
@@ -18,6 +24,7 @@ const tableColumnEditIndex = ref(-1);
 const tableRowInputRef: any = ref(null);
 const navCols = ref<(string | number)[]>([]);
 const showTable = ref(false);
+
 
 // to prohibit the table from showing before the data is ready
 setTimeout(() => {
@@ -46,7 +53,7 @@ const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.name === scope.column.property)!
     const navValue = scope.row[Object.keys(scope.row)[0]]
     if (field.field_name == null || field.field_pos == 0) return
-    if (navValue.indexOf("合计") != -1) return
+    if (typeof (navValue) == 'string' && navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
     tableColumnEditIndex.value = scope.column.id
@@ -84,12 +91,17 @@ const deleteRow = async (scope: any) => {
     emits('updateStamp') // update all the reports data in the current page.
 }
 
+const tableMaxHeight = computed(() => {
+    if (page.reports.length > 1) return 400
+    return window.innerHeight - 300;
+})
+
 </script>
 <template>
-    <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="400" stripe>
+    <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="tableMaxHeight" stripe>
         <template v-for="field in report.fields">
             <el-table-column :key="field.name" v-if="!report.updateable_fields_only || field.field_name"
-                :prop="field.name" :label="field.name" :min-width="60">
+                :prop="field.name" :label="field.name" :min-width="60" :width="field.width">
                 <template #header>
                     <el-icon v-if="field.field_name != null && field.field_pos != 0">
                         <EditPen />
