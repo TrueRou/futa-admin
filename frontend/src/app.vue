@@ -17,7 +17,7 @@
       </div>
     </el-header>
     <el-container>
-      <el-aside width="200px">
+      <el-aside width="200px" style="height: calc(100vh - 50px)">
         <el-scrollbar>
           <el-menu :default-active="$router.currentRoute.value.path" :default-openeds="['analysis']" :router="true">
             <el-menu-item index="/">
