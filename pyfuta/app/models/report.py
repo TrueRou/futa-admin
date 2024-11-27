@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import IntEnum, auto
-from typing import Any
+from typing import Any, List, Optional
 from sqlalchemy import JSON, Column, DateTime, Float, String
 from sqlmodel import Field, SQLModel
 
@@ -53,11 +53,11 @@ class ReportFieldType(IntEnum):
 class Report(SQLModel, table=True):
     __tablename__ = "def_reports"
 
-    id: int | None = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     sql: str
     type: ReportType = Field(default=ReportType.FORM)
-    table_name: str | None = Field(default=None)
+    table_name: Optional[str] = Field(default=None)
     is_editable: bool = Field(default=False)
     updateable_fields_only: bool = Field(default=False)
 
@@ -66,13 +66,13 @@ class ReportField(SQLModel, table=True):
     __tablename__ = "def_report_fields"
 
     report_id: int = Field(foreign_key="def_reports.id", primary_key=True)
-    field_pos: int = Field(primary_key=True)
+    field_id: int = Field(primary_key=True)
     name: str
     type: ReportFieldType
-    field_name: str | None = Field(default=None)
+    field_name: Optional[str] = Field(default=None)
     is_primary_key: bool = Field(default=False)
     is_fixed: bool = Field(default=False)
-    width: int | None = Field(default=None)
+    width: Optional[int] = Field(default=None)
 
     def to_column(self):
         return
@@ -86,8 +86,8 @@ class ReportFragment(SQLModel, table=True):
     sql: str
     name: str
     type: ReportFragmentType = Field(default=ReportFragmentType.FILTER_SELECT)
-    labels: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
-    values: str | None = Field(default=None)  # only for FILTER_SELECT, (split by ,)
+    labels: Optional[str] = Field(default=None)  # only for FILTER_SELECT, (split by ,)
+    values: Optional[str] = Field(default=None)  # only for FILTER_SELECT, (split by ,)
 
 
 class ReportMixin(SQLModel, table=True):
@@ -96,24 +96,24 @@ class ReportMixin(SQLModel, table=True):
     report_id: int = Field(foreign_key="def_reports.id", primary_key=True)
     ref_variable: str = Field(default="option", primary_key=True)
     values: dict = Field(sa_column=Column(JSON), default_factory=dict)
-    sideload_sql: str | None = Field(default=None)
+    sideload_sql: Optional[str] = Field(default=None)
 
 
 class ReportFieldPublic(SQLModel):
     name: str
-    field_pos: int
+    field_id: int
     type: ReportFieldType
-    field_name: str | None
+    field_name: Optional[str]
     is_fixed: bool
-    width: int | None
+    width: Optional[int]
 
 
 class ReportFragmentPublic(SQLModel):
     trait: str
     name: str
     type: ReportFragmentType
-    labels: list[str]
-    values: list[str]
+    labels: List[str]
+    values: List[str]
 
 
 class ReportMixinPublic(SQLModel):
@@ -133,7 +133,7 @@ class ReportPublic(SQLModel):
     type: ReportType = Field(default=ReportType.FORM)
     is_editable: bool
     updateable_fields_only: bool
-    fields: list[ReportFieldPublic]
-    fragments: list[ReportFragmentPublic]
-    mixins: list[ReportMixinPublic]
-    data: list[tuple]  # this will be the data returned from the table query
+    fields: List[ReportFieldPublic]
+    fragments: List[ReportFragmentPublic]
+    mixins: List[ReportMixinPublic]
+    data: List[tuple]  # this will be the data returned from the table query

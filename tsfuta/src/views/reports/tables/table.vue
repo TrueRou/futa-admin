@@ -52,7 +52,7 @@ const tableData = computed(() => {
 const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.name === scope.column.property)!
     const navValue = scope.row[Object.keys(scope.row)[0]]
-    if (field.field_name == null || field.field_pos == 0) return
+    if (field.field_name == null || field.field_id == 0) return
     if (typeof (navValue) == 'string' && navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
@@ -72,9 +72,9 @@ const onInputTableBlur = async (scope: any) => {
     const value = scope.row[scope.column.property]
 
     await axios.patch(`/reports/${props.report.id}?` + qs.stringify({
-        nav_field_pos: navField.field_pos,
+        nav_field_id: navField.field_id,
         nav_value: navValue,
-        field_pos: upsertField.field_pos,
+        field_id: upsertField.field_id,
         value: value
     }))
 
@@ -103,7 +103,7 @@ const tableMaxHeight = computed(() => {
             <el-table-column :key="field.name" v-if="!report.updateable_fields_only || field.field_name"
                 :prop="field.name" :label="field.name" :min-width="60" :width="field.width">
                 <template #header>
-                    <el-icon v-if="field.field_name != null && field.field_pos != 0">
+                    <el-icon v-if="field.field_name != null && field.field_id != 0">
                         <EditPen />
                     </el-icon>
                     {{ field.name }}

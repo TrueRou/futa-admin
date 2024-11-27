@@ -3,7 +3,7 @@
 import colorsys
 import datetime
 from enum import IntEnum
-from typing import Optional
+from typing import List, Optional, Tuple
 from typing import overload
 from typing import Union
 
@@ -74,11 +74,6 @@ def get_timestamp(full: bool = False, tz: Optional[datetime.tzinfo] = None) -> s
     return f"{datetime.datetime.now(tz=tz):{fmt}}"
 
 
-def set_timezone(tz: datetime.tzinfo) -> None:
-    global _log_tz
-    _log_tz = tz
-
-
 def printc(msg: str, col: Colour_Types, end: str = "\n") -> None:
     """Print a string, in a specified ansi colour."""
     print(f"{col!r}{msg}{Ansi.RESET!r}", end=end)
@@ -97,7 +92,7 @@ def log(
     well by passing the filepath with the `file` parameter.
     """
 
-    ts_short = get_timestamp(full=False, tz=_log_tz)
+    ts_short = get_timestamp(full=False)
 
     if col:
         if col is Rainbow:
@@ -112,14 +107,14 @@ def log(
     if file:
         # log simple ascii output to file.
         with open(file, "a+") as f:
-            f.write(f"[{get_timestamp(full=True, tz=_log_tz)}] {msg}\n")
+            f.write(f"[{get_timestamp(full=True)}] {msg}\n")
 
 
 def rainbow_color_stops(
     n: int = 10,
     lum: float = 0.5,
     end: float = 2 / 3,
-) -> list[tuple[float, float, float]]:
+) -> List[Tuple[float, float, float]]:
     return [(r * 255, g * 255, b * 255) for r, g, b in [colorsys.hls_to_rgb(end * i / (n - 1), lum, 1) for i in range(n)]]
 
 

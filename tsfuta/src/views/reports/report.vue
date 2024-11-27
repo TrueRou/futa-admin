@@ -55,7 +55,7 @@ const updateReport = () => {
     for (let i = 1; i < length; i++) {
         const newField = { ...result.fields[1] }
         newField.name = keys[i]
-        newField.field_pos = i + 1
+        newField.field_id = i + 1
         result.fields.push(newField)
 
         values[i].data.forEach((row, index) => {

@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import List
 from fastapi import APIRouter, Depends, File, HTTPException
 from openpyxl import load_workbook
 from pyfuta.app.database import require_session
@@ -15,7 +16,7 @@ router = APIRouter(prefix="/import", tags=["Import"])
 @router.post("/excel")
 async def import_excel(
     report: Report = Depends(require_report),
-    fields: list[ReportField] = Depends(require_fields),
+    fields: List[ReportField] = Depends(require_fields),
     session: Session = Depends(require_session),
     file: bytes = File(),
 ):

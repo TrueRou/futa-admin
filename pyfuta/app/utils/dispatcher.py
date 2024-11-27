@@ -1,5 +1,5 @@
 import json
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable, Tuple
 from pyfuta.app.database import async_engine
 from pyfuta.app.models.report import ReportFragment, ReportFragmentType, ReportMixin
 from sqlalchemy import text
@@ -14,7 +14,7 @@ async def sideload_mixins(mixins: Iterable[ReportMixin]):
             mixin_str = json.dumps(mixin.values)
             if mixin.sideload_sql is not None:
                 result = await conn.execute(text(mixin.sideload_sql))
-                result_tuple: tuple[str] = result.fetchone().tuple()
+                result_tuple: Tuple[str] = result.fetchone().tuple()
                 for index, value in enumerate(result_tuple):
                     mixin_str = mixin_str.replace('"${' + str(index) + '}"', str(value) if type(value) == int else f'"{value}"')
             mixin.values = json.loads(mixin_str)
@@ -53,7 +53,7 @@ async def dispatch_updating(table_name: str, field_name: str, nav_field_name: st
         await conn.execute(text(statement), value_dict)
 
 
-async def dispatch_inserting(table_name: str, data: dict[str, Any]):
+async def dispatch_inserting(table_name: str, data: Dict[str, Any]):
     statement = f"INSERT INTO {table_name} ({','.join(data.keys())}) VALUES ({','.join([':' + key for key in data.keys()])})"
     async with async_engine.begin() as conn:
         await conn.execute(text(statement), data)

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException
 from pyfuta.app.database import require_session
 from pyfuta.app.utils import dispatcher
@@ -16,14 +16,14 @@ def require_report(report_id: int, session: Session = Depends(require_session)) 
     return report
 
 
-def require_field(field_pos: int, report: Report = Depends(require_report), session: Session = Depends(require_session)) -> ReportField:
-    field = session.get(ReportField, (report.id, field_pos))
+def require_field(field_id: int, report: Report = Depends(require_report), session: Session = Depends(require_session)) -> ReportField:
+    field = session.get(ReportField, (report.id, field_id))
     if field is None:
         raise HTTPException(status_code=404, detail="Field not found")
     return field
 
 
-def require_fields(report: Report = Depends(require_report), session: Session = Depends(require_session)) -> list[ReportField]:
+def require_fields(report: Report = Depends(require_report), session: Session = Depends(require_session)) -> List[ReportField]:
     fields = session.exec(select(ReportField).where(ReportField.report_id == report.id)).all()
     if len(fields) == 0:
         raise HTTPException(status_code=404, detail="Report has no fields")
@@ -32,9 +32,9 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
 
 @router.post("/{report_id}", response_model=ReportPublic)
 async def get_report(
-    fragments: dict[str, Any] = {},
+    fragments: Dict[str, Any] = {},
     report: Report = Depends(require_report),
-    fields: list[ReportField] = Depends(require_fields),
+    fields: List[ReportField] = Depends(require_fields),
     session: Session = Depends(require_session),
 ):
     fragments = {k: v for k, v in fragments.items() if v is not None}
@@ -48,10 +48,10 @@ async def get_report(
     return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=frags, mixins=mixins)
 
 
-@router.patch("/{report_id}")
-async def patch_report(
-    field_pos: int,
-    nav_field_pos: int,
+@router.patch("/{report_id}/row")
+async def patch_row_in_report(
+    field_id: int,
+    nav_field_id: int,
     value: str,
     nav_value: str,
     report: Report = Depends(require_report),
@@ -59,8 +59,8 @@ async def patch_report(
 ):
     if report.table_name is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
-    field = require_field(field_pos, report, session)
-    nav_field = require_field(nav_field_pos, report, session)
+    field = require_field(field_id, report, session)
+    nav_field = require_field(nav_field_id, report, session)
     if field.field_name is None or nav_field.field_name is None:
         raise HTTPException(status_code=404, detail="Field is not bound to a table field")
     value = field.type.parse(value)
@@ -69,8 +69,8 @@ async def patch_report(
 
 
 @router.post("/{report_id}/row")
-async def create_row(
-    data: dict[str, str],
+async def insert_row_to_report(
+    data: Dict[str, str],
     report: Report = Depends(require_report),
     session: Session = Depends(require_session),
 ):
@@ -85,7 +85,7 @@ async def create_row(
 
 
 @router.delete("/{report_id}/row")
-async def delete_row(
+async def delete_row_from_report(
     primary_key_value: str,
     report: Report = Depends(require_report),
     session: Session = Depends(require_session),

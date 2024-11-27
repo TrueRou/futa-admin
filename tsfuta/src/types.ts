@@ -27,7 +27,7 @@ interface ReportField {
     name: string;
     type: ReportFieldType;
     field_name: string | null;
-    field_pos: number;
+    field_id: number;
     is_fixed: boolean;
     width: number | null;
 }

@@ -5,13 +5,13 @@
             "command": "npm run dev",
             "request": "launch",
             "type": "node-terminal",
-            "cwd": "${workspaceFolder}/frontend"
+            "cwd": "${workspaceFolder}/tsfuta"
         },
         {
             "name": "Run Backend",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/backend/src/pyfuta/main.py",
+            "program": "${workspaceFolder}/pyfuta/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "env": {

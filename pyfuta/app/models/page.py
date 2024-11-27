@@ -1,3 +1,4 @@
+from typing import List, Optional
 from pyfuta.app.models.report import ReportSimple
 from sqlmodel import Field, SQLModel
 
@@ -13,7 +14,7 @@ class Page(SQLModel, table=True):
 class PageReport(SQLModel, table=True):
     __tablename__ = "def_page_reports"
 
-    id: int | None = Field(default=None, primary_key=True)  # this is necessary
+    id: Optional[int] = Field(default=None, primary_key=True)  # this is necessary
     page_path: str = Field(foreign_key="def_pages.path")
     report_id: int = Field(foreign_key="def_reports.id")
 
@@ -21,5 +22,16 @@ class PageReport(SQLModel, table=True):
 class PagePublic(SQLModel):
     path: str
     name: str
-    description: str | None
-    reports: list[ReportSimple]
+    description: Optional[str]
+    reports: List[ReportSimple]
+
+
+class PageCreate(SQLModel):
+    name: str
+    description: Optional[str]
+
+
+class PageUpdate(SQLModel):
+    path: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
