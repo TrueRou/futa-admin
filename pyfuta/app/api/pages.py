@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pyfuta.app.database import require_session
-from pyfuta.app.pages.models import Page, PagePublic, PageReport
-from pyfuta.app.reports.models import Report, ReportSimple
+from pyfuta.app.models.page import Page, PagePublic, PageReport
+from pyfuta.app.models.report import Report, ReportSimple
 from sqlmodel import Session, select
 
 
-router = APIRouter(prefix="/pages", tags=["pages"])
+router = APIRouter(prefix="/page", tags=["Pages"])
 
 
 @router.get("/", response_model=list[PagePublic])

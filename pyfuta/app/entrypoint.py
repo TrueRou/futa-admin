@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from starlette.middleware.cors import CORSMiddleware
 
-from pyfuta.app import database, imports, pages, reports
+from pyfuta.app import api, database
 from pyfuta.app.database import async_session_ctx
 from pyfuta.app.logging import log, Ansi
 
@@ -46,9 +46,7 @@ def init_routes(asgi_app: FastAPI) -> None:
     async def root():
         return {"message": "Welcome to pyfuta!"}
 
-    asgi_app.include_router(reports.routes.router)
-    asgi_app.include_router(pages.routes.router)
-    asgi_app.include_router(imports.routes.router)
+    asgi_app.include_router(api.router)
 
 
 def init_api() -> FastAPI:

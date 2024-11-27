@@ -1,6 +1,5 @@
 import contextlib
 from fastapi import Request
-from sqlalchemy import text
 from sqlmodel import create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -11,24 +10,10 @@ engine = create_engine(config.database_url)
 async_engine = create_async_engine(config.database_url.replace("sqlite://", "sqlite+aiosqlite://"))
 
 
-async def drop_def_tables():
-    async with async_engine.begin() as conn:
-        result = await conn.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))
-        [await conn.execute(text(f"DROP TABLE {table_name}")) for (table_name,) in result if table_name.startswith("def_")]
-
-
 async def create_db_and_tables(engine):
-    # make sure all models are imported (keep its record in metadata)
+    from pyfuta.app.models import SQLModel
 
-    import pyfuta.app.pages.models as models
-    import pyfuta.app.reports.models as models
-    import pyfuta.app.reports.builder as reports
-    import pyfuta.app.pages.builder as pages
-
-    await drop_def_tables()  # drop all def tables, we will recreate them
-    models.metadata.create_all(engine)  # tricks the linter
-    await reports.metadata.create_all()
-    await pages.metadata.create_all()
+    SQLModel.metadata.create_all(engine)
 
 
 # https://stackoverflow.com/questions/75487025/how-to-avoid-creating-multiple-sessions-when-using-fastapi-dependencies-with-sec

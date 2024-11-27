@@ -6,7 +6,6 @@ from enum import IntEnum
 from typing import Optional
 from typing import overload
 from typing import Union
-from zoneinfo import ZoneInfo
 
 
 class Ansi(IntEnum):
@@ -73,9 +72,6 @@ Colour_Types = Union[Ansi, RGB, _Rainbow]
 def get_timestamp(full: bool = False, tz: Optional[datetime.tzinfo] = None) -> str:
     fmt = "%d/%m/%Y %I:%M:%S%p" if full else "%I:%M:%S%p"
     return f"{datetime.datetime.now(tz=tz):{fmt}}"
-
-
-_log_tz = ZoneInfo("GMT")  # default
 
 
 def set_timezone(tz: datetime.tzinfo) -> None:

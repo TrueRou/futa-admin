@@ -2,14 +2,14 @@ from io import BytesIO
 from fastapi import APIRouter, Depends, File, HTTPException
 from openpyxl import load_workbook
 from pyfuta.app.database import require_session
-from pyfuta.app.reports.models import Report, ReportField
-from pyfuta.app.reports.routes import require_fields, require_report
+from pyfuta.app.models.report import Report, ReportField
+from pyfuta.app.api.reports import require_fields, require_report
 from sqlalchemy import Table
 from sqlalchemy.dialects.sqlite import insert
 from sqlmodel import SQLModel, Session
 from pyfuta.app.database import async_engine
 
-router = APIRouter(prefix="/imports", tags=["imports"])
+router = APIRouter(prefix="/import", tags=["Import"])
 
 
 @router.post("/excel")

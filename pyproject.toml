@@ -5,9 +5,12 @@ description = "A low code analysis platform based on python."
 authors = ["Usagi no Niku <chenbohan911@163.com>"]
 license = "GPL-3.0"
 readme = "README.md"
+packages = [
+    { include = "pyfuta" }
+]
 
 [tool.poetry.dependencies]
-python = "~3.12"
+python = "3.8.6"
 fastapi = "^0.111.0"
 sqlalchemy = "^2.0.30"
 python-multipart = "^0.0.9"

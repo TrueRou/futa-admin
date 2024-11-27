@@ -1,4 +1,4 @@
-from pyfuta.app.reports.models import ReportSimple
+from pyfuta.app.models.report import ReportSimple
 from sqlmodel import Field, SQLModel
 
 

@@ -1,12 +1,12 @@
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pyfuta.app.database import require_session
-from pyfuta.app.reports import dispatcher
-from pyfuta.app.reports.models import Report, ReportField, ReportFragment, ReportFragmentPublic, ReportMixin, ReportPublic
+from pyfuta.app.utils import dispatcher
+from pyfuta.app.models.report import Report, ReportField, ReportFragment, ReportFragmentPublic, ReportMixin, ReportPublic
 from sqlmodel import Session, select
 
 
-router = APIRouter(prefix="/reports", tags=["reports"])
+router = APIRouter(prefix="/report", tags=["Report"])
 
 
 def require_report(report_id: int, session: Session = Depends(require_session)) -> Report:
@@ -68,7 +68,7 @@ async def patch_report(
     await dispatcher.dispatch_updating(report.table_name, field.field_name, nav_field.field_name, value, nav_value)
 
 
-@router.post("/{report_id}/rows")
+@router.post("/{report_id}/row")
 async def create_row(
     data: dict[str, str],
     report: Report = Depends(require_report),
@@ -84,7 +84,7 @@ async def create_row(
     await dispatcher.dispatch_inserting(report.table_name, data)
 
 
-@router.delete("/{report_id}/rows")
+@router.delete("/{report_id}/row")
 async def delete_row(
     primary_key_value: str,
     report: Report = Depends(require_report),

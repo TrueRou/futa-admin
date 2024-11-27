@@ -1,7 +1,7 @@
 import json
 from typing import Any, Iterable
 from pyfuta.app.database import async_engine
-from pyfuta.app.reports.models import ReportFragment, ReportFragmentType, ReportMixin
+from pyfuta.app.models.report import ReportFragment, ReportFragmentType, ReportMixin
 from sqlalchemy import text
 from sqlmodel import Session
 import re
