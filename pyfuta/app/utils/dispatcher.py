@@ -1,25 +1,9 @@
-import json
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict
 from pyfuta.app.database import async_engine
-from pyfuta.app.models.report import ReportFragment, ReportFragmentType, ReportMixin
+from pyfuta.app.models.report import ReportFragment, ReportFragmentType
 from sqlalchemy import text
 from sqlmodel import Session
 import re
-
-
-async def sideload_mixins(mixins: Iterable[ReportMixin]):
-    response = []
-    async with async_engine.begin() as conn:
-        for mixin in mixins:
-            mixin_str = json.dumps(mixin.values)
-            if mixin.sideload_sql is not None:
-                result = await conn.execute(text(mixin.sideload_sql))
-                result_tuple: Tuple[str] = result.fetchone().tuple()
-                for index, value in enumerate(result_tuple):
-                    mixin_str = mixin_str.replace('"${' + str(index) + '}"', str(value) if type(value) == int else f'"{value}"')
-            mixin.values = json.loads(mixin_str)
-            response.append(mixin)
-    return response
 
 
 async def dispatch_statement(statement: str, parameters: dict, session: Session, report_id: int):

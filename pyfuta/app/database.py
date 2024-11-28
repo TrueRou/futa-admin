@@ -1,4 +1,5 @@
 import contextlib
+from typing import Dict, Union
 from fastapi import Request
 from sqlmodel import SQLModel, create_engine, Session
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -48,9 +49,11 @@ def add_model(session: Session, *models):
     [session.refresh(model) for model in models if model]
 
 
-def partial_update_model(session: Session, item: SQLModel, updates: SQLModel):
+def partial_update_model(session: Session, item: SQLModel, updates: Union[SQLModel, Dict]):
     if item and updates:
-        update_data = updates.model_dump(exclude_unset=True)
+        update_data = updates
+        if isinstance(updates, SQLModel):
+            update_data = updates.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(item, key, value)
         session.commit()

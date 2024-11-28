@@ -1,8 +1,19 @@
-from typing import Any, Dict, List
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Any, Dict, List, Union
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pyfuta.app import database
 from pyfuta.app.database import require_session
 from pyfuta.app.utils import dispatcher
-from pyfuta.app.models.report import Report, ReportField, ReportFragment, ReportFragmentPublic, ReportMixin, ReportPublic
+from pyfuta.app.models.report import (
+    Report,
+    ReportCreate,
+    ReportField,
+    ReportFragment,
+    ReportMixin,
+    ReportPublic,
+    ReportUpdate,
+    ReportPublicFull,
+    ReportPublicFullAdmin,
+)
 from sqlmodel import Session, select
 
 
@@ -30,22 +41,34 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
     return fields
 
 
-@router.post("/{report_id}", response_model=ReportPublic)
+@router.post("", response_model=ReportPublic)
+async def create_report(report: ReportCreate, session: Session = Depends(require_session)):
+    new_report = Report(**report.model_dump())
+    database.add_model(session, new_report)
+    return new_report
+
+
+@router.post("/{report_id}", response_model=Union[ReportPublicFull, ReportPublicFullAdmin])
 async def get_report(
+    request: Request,
     fragments: Dict[str, Any] = {},
     report: Report = Depends(require_report),
     fields: List[ReportField] = Depends(require_fields),
     session: Session = Depends(require_session),
 ):
+    with_admin = request.headers.get("X-Admin", False)
     fragments = {k: v for k, v in fragments.items() if v is not None}
     data = await dispatcher.dispatch_statement(report.sql, fragments, session, report.id)
-    frags = [
-        ReportFragmentPublic(**frag.model_dump(exclude=["values", "labels"]), values=frag.values.split(","), labels=frag.labels.split(","))
-        for frag in session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
-    ]
+    frags = session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))
     mixins = session.exec(select(ReportMixin).where(ReportMixin.report_id == report.id))
-    mixins = await dispatcher.sideload_mixins(mixins)
-    return ReportPublic(**report.model_dump(), fields=fields, data=data, fragments=frags, mixins=mixins)
+    report_full = ReportPublicFull(**report.model_dump(), fields=fields, data=data, fragments=frags, mixins=mixins)
+    return ReportPublicFullAdmin(**report_full.model_dump(), sql=report.sql) if with_admin else report_full
+
+
+@router.patch("/{report_id}", response_model=ReportPublic)
+async def patch_report(updates: ReportUpdate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    database.partial_update_model(session, report, updates.model_dump())
+    return report
 
 
 @router.patch("/{report_id}/row")
@@ -57,15 +80,15 @@ async def patch_row_in_report(
     report: Report = Depends(require_report),
     session: Session = Depends(require_session),
 ):
-    if report.table_name is None:
+    if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
     field = require_field(field_id, report, session)
     nav_field = require_field(nav_field_id, report, session)
-    if field.field_name is None or nav_field.field_name is None:
+    if field.linked_field is None or nav_field.linked_field is None:
         raise HTTPException(status_code=404, detail="Field is not bound to a table field")
     value = field.type.parse(value)
     nav_value = nav_field.type.parse(nav_value)
-    await dispatcher.dispatch_updating(report.table_name, field.field_name, nav_field.field_name, value, nav_value)
+    await dispatcher.dispatch_updating(report.linked_table, field.linked_field, nav_field.linked_field, value, nav_value)
 
 
 @router.post("/{report_id}/row")
@@ -74,14 +97,14 @@ async def insert_row_to_report(
     report: Report = Depends(require_report),
     session: Session = Depends(require_session),
 ):
-    if report.table_name is None:
+    if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
     for key in data.keys():
-        field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.field_name == key)).first()
+        field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.linked_field == key)).first()
         if field is None:
             raise HTTPException(status_code=404, detail=f"Field not found: {key}")
         data[key] = field.type.parse(data[key])
-    await dispatcher.dispatch_inserting(report.table_name, data)
+    await dispatcher.dispatch_inserting(report.linked_table, data)
 
 
 @router.delete("/{report_id}/row")
@@ -90,10 +113,10 @@ async def delete_row_from_report(
     report: Report = Depends(require_report),
     session: Session = Depends(require_session),
 ):
-    if report.table_name is None:
+    if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
-    pk_field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.is_primary_key == True)).first()
+    pk_field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.index == True)).first()
     if pk_field is None:
         raise HTTPException(status_code=404, detail="Primary key not found for report")
     pk_value = pk_field.type.parse(primary_key_value)
-    await dispatcher.dispatch_deleting(report.table_name, pk_field.field_name, pk_value)
+    await dispatcher.dispatch_deleting(report.linked_table, pk_field.linked_field, pk_value)
