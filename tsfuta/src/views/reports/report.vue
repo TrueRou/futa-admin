@@ -131,8 +131,8 @@ watch(() => props.stamp, fetchReports, { immediate: true })
     </el-card>
     <el-dialog v-model="newRowDialogVisible" title="添加条目" width="500">
         <el-form label-width="auto">
-            <el-form-item v-for="field in report?.fields.filter(f => f.field_name)" :label="field.name">
-                <el-input v-model="newRowForm[field.field_name!]" autocomplete="off" />
+            <el-form-item v-for="field in report?.fields.filter(f => f.linked_field)" :label="field.name">
+                <el-input v-model="newRowForm[field.linked_field!]" autocomplete="off" />
             </el-form-item>
         </el-form>
         <template #footer>

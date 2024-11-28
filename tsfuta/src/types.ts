@@ -26,7 +26,7 @@ interface ReportSimple {
 interface ReportField {
     name: string;
     type: ReportFieldType;
-    field_name: string | null;
+    linked_field: string | null;
     field_id: number;
     is_fixed: boolean;
     width: number | null;

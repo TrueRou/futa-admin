@@ -30,19 +30,19 @@ async def dispatch_statement(statement: str, parameters: dict, session: Session,
         return result.fetchall()
 
 
-async def dispatch_updating(table_name: str, field_name: str, nav_field_name: str, value: Any, nav_value: Any):
+async def dispatch_updating(linked_table: str, linked_field: str, nav_linked_field: str, value: Any, nav_value: Any):
     value_dict = {"value": value, "nav_value": nav_value}
-    statement = f"INSERT INTO {table_name} ({field_name}, {nav_field_name}) VALUES (:value, :nav_value) ON CONFLICT ({nav_field_name}) DO UPDATE SET {field_name}=:value"
+    statement = f"INSERT INTO {linked_table} ({linked_field}, {nav_linked_field}) VALUES (:value, :nav_value) ON CONFLICT ({nav_linked_field}) DO UPDATE SET {linked_field}=:value"
     async with async_engine.begin() as conn:
         await conn.execute(text(statement), value_dict)
 
 
-async def dispatch_inserting(table_name: str, data: Dict[str, Any]):
-    statement = f"INSERT INTO {table_name} ({','.join(data.keys())}) VALUES ({','.join([':' + key for key in data.keys()])})"
+async def dispatch_inserting(linked_table: str, data: Dict[str, Any]):
+    statement = f"INSERT INTO {linked_table} ({','.join(data.keys())}) VALUES ({','.join([':' + key for key in data.keys()])})"
     async with async_engine.begin() as conn:
         await conn.execute(text(statement), data)
 
 
-async def dispatch_deleting(table_name: str, pk_field: str, pk_value: Any):
+async def dispatch_deleting(linked_table: str, pk_field: str, pk_value: Any):
     async with async_engine.begin() as conn:
-        await conn.execute(text(f"DELETE FROM {table_name} WHERE {pk_field} = :value"), {"value": pk_value})
+        await conn.execute(text(f"DELETE FROM {linked_table} WHERE {pk_field} = :value"), {"value": pk_value})

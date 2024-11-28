@@ -23,8 +23,8 @@ async def import_excel(
     workbook = load_workbook(BytesIO(file), read_only=True)
     sheet = workbook.worksheets[0]
     headers = [cell.value for cell in sheet[1]]
-    table_headers = [field.field_name for field in fields if field.field_name is not None]
-    if report.table_name is None:
+    table_headers = [field.linked_field for field in fields if field.linked_field is not None]
+    if report.linked_table is None:
         raise HTTPException(status_code=400, detail="Report is not bound to a table")
     if len(headers) != len(table_headers):
         raise HTTPException(status_code=400, detail="Number of columns in the file does not match the number of table fields in the report")
@@ -34,7 +34,7 @@ async def import_excel(
         parsed_rows.append([field.type.parse(cell) for field, cell in zip(fields, row)])
 
     # we use sqlite dialect for insert on conflict do nothing
-    table = Table(report.table_name, SQLModel.metadata, autoload_with=session.bind)
+    table = Table(report.linked_table, SQLModel.metadata, autoload_with=session.bind)
     statement = insert(table).on_conflict_do_nothing()
     sentences = [dict(zip(table_headers, row)) for row in parsed_rows]
 

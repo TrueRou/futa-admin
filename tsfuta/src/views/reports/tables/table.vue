@@ -52,7 +52,7 @@ const tableData = computed(() => {
 const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.name === scope.column.property)!
     const navValue = scope.row[Object.keys(scope.row)[0]]
-    if (field.field_name == null || field.field_id == 0) return
+    if (field.linked_field == null || field.field_id == 0) return
     if (typeof (navValue) == 'string' && navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
@@ -100,10 +100,10 @@ const tableMaxHeight = computed(() => {
 <template>
     <el-table v-if="showTable" :data="tableData" class="w-full" :max-height="tableMaxHeight" stripe>
         <template v-for="field in report.fields">
-            <el-table-column :key="field.name" v-if="!report.updateable_fields_only || field.field_name"
+            <el-table-column :key="field.name" v-if="!report.updateable_fields_only || field.linked_field"
                 :prop="field.name" :label="field.name" :min-width="60" :width="field.width">
                 <template #header>
-                    <el-icon v-if="field.field_name != null && field.field_id != 0">
+                    <el-icon v-if="field.linked_field != null && field.field_id != 0">
                         <EditPen />
                     </el-icon>
                     {{ field.name }}
