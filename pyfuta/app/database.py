@@ -58,3 +58,8 @@ def partial_update_model(session: Session, item: SQLModel, updates: Union[SQLMod
             setattr(item, key, value)
         session.commit()
         session.refresh(item)
+
+
+def delete_model(session: Session, model: SQLModel):
+    session.delete(model)
+    session.commit()

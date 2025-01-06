@@ -24,7 +24,7 @@ class ReportField(SQLModel, table=True):
     __tablename__ = "def_report_fields"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    index: int
+    order: int
     label: str
     type: ReportFieldType
     linked_field: str = Field(default="")
@@ -33,14 +33,14 @@ class ReportField(SQLModel, table=True):
 
 
 class ReportFieldCreate(SQLModel):
-    index: int
+    order: int
     label: str
     type: ReportFieldType
     linked_field: Optional[str]
 
 
 class ReportFieldUpdate(SQLModel):
-    index: Optional[int]
+    order: Optional[int]
     label: Optional[str]
     type: Optional[ReportFieldType]
     linked_field: Optional[str]
@@ -48,7 +48,7 @@ class ReportFieldUpdate(SQLModel):
 
 class ReportFieldPublic(SQLModel):
     id: int
-    index: int
+    order: int
     label: str
     type: ReportFieldType
     linked_field: str

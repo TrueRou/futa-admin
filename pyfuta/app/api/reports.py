@@ -2,6 +2,9 @@ from typing import Any, Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pyfuta.app import database
 from pyfuta.app.database import require_session
+from pyfuta.app.models.report.field import ReportFieldCreate, ReportFieldUpdate
+from pyfuta.app.models.report.fragment import ReportFragmentCreate, ReportFragmentUpdate
+from pyfuta.app.models.report.mixin import ReportMixinCreate
 from pyfuta.app.utils import dispatcher
 from pyfuta.app.models.report import (
     Report,
@@ -15,9 +18,6 @@ from pyfuta.app.models.report import (
     ReportPublicFullAdmin,
 )
 from sqlmodel import Session, select
-
-
-router = APIRouter(prefix="/report", tags=["Report"])
 
 
 def require_report(report_id: int, session: Session = Depends(require_session)) -> Report:
@@ -41,20 +41,24 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
     return fields
 
 
-@router.post("", response_model=ReportPublic)
+# region: Report Router
+report_router = APIRouter(prefix="/report", tags=["Reports"])
+
+
+@report_router.post("", response_model=ReportPublic)
 async def create_report(report: ReportCreate, session: Session = Depends(require_session)):
     new_report = Report(**report.model_dump())
     database.add_model(session, new_report)
     return new_report
 
 
-@router.get("", response_model=List[Union[ReportPublic]])
+@report_router.get("", response_model=List[Union[ReportPublic]])
 async def get_reports(session: Session = Depends(require_session)):
     reports = session.exec(select(Report))
     return reports
 
 
-@router.post("/{report_id}", response_model=Union[ReportPublicFull, ReportPublicFullAdmin])
+@report_router.post("/{report_id}", response_model=Union[ReportPublicFull, ReportPublicFullAdmin])
 async def get_report(
     request: Request,
     fragments: Dict[str, Any] = {},
@@ -71,13 +75,18 @@ async def get_report(
     return ReportPublicFullAdmin(**report_full.model_dump(), sql=report.sql) if with_admin else report_full
 
 
-@router.patch("/{report_id}", response_model=ReportPublic)
+@report_router.patch("/{report_id}", response_model=ReportPublic)
 async def patch_report(updates: ReportUpdate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
     database.partial_update_model(session, report, updates.model_dump())
     return report
 
 
-@router.patch("/{report_id}/row")
+@report_router.delete("/{report_id}")
+async def delete_report(report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    database.delete_model(session, report)
+
+
+@report_router.patch("/{report_id}/row")
 async def patch_row_in_report(
     field_id: int,
     nav_field_id: int,
@@ -97,12 +106,8 @@ async def patch_row_in_report(
     await dispatcher.dispatch_updating(report.linked_table, field.linked_field, nav_field.linked_field, value, nav_value)
 
 
-@router.post("/{report_id}/row")
-async def insert_row_to_report(
-    data: Dict[str, str],
-    report: Report = Depends(require_report),
-    session: Session = Depends(require_session),
-):
+@report_router.post("/{report_id}/row")
+async def insert_row_to_report(data: Dict[str, str], report: Report = Depends(require_report), session: Session = Depends(require_session)):
     if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
     for key in data.keys():
@@ -113,16 +118,103 @@ async def insert_row_to_report(
     await dispatcher.dispatch_inserting(report.linked_table, data)
 
 
-@router.delete("/{report_id}/row")
-async def delete_row_from_report(
-    primary_key_value: str,
-    report: Report = Depends(require_report),
-    session: Session = Depends(require_session),
-):
+@report_router.delete("/{report_id}/row")
+async def delete_row_from_report(primary_key_value: str, report: Report = Depends(require_report), session: Session = Depends(require_session)):
     if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
-    pk_field = session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.index == True)).first()
+    pk_field = session.exec(select(ReportField).order_by(ReportField.order).where(ReportField.report_id == report.id)).first()
     if pk_field is None:
         raise HTTPException(status_code=404, detail="Primary key not found for report")
     pk_value = pk_field.type.parse(primary_key_value)
     await dispatcher.dispatch_deleting(report.linked_table, pk_field.linked_field, pk_value)
+
+
+# endregion: Report Router
+
+# region: Field Router
+field_router = APIRouter(prefix="/field", tags=["Fields"])
+
+
+@field_router.post("", response_model=ReportField, tags=["Fields"])
+async def create_field(field: ReportFieldCreate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    if session.exec(select(ReportField).where(ReportField.report_id == report.id, ReportField.order == field.order)).first():
+        raise HTTPException(status_code=400, detail="Order index already exists")
+    field = ReportField(**field.model_dump(), report_id=report.id)
+    database.add_model(session, field)
+    return field
+
+
+@field_router.patch("/{field_id}", response_model=ReportField)
+async def patch_field(updates: ReportFieldUpdate, field: ReportField = Depends(require_field), session: Session = Depends(require_session)):
+    if field.order != updates.order:
+        # this is a reorder patch, we only update the order, no need to check other changes
+        if target := session.exec(select(ReportField).where(ReportField.report_id == field.report_id, ReportField.order == updates.order)).first():
+            target.order = field.order  # swap orders
+        field.order = updates.order
+        session.commit()
+        return field  # return the updated field, skip the rest
+    database.partial_update_model(session, field, updates.model_dump())
+    return field
+
+
+@field_router.delete("/{field_id}")
+async def delete_field(field: ReportField = Depends(require_field), session: Session = Depends(require_session)):
+    database.delete_model(session, field)
+
+
+# endregion: Field Router
+
+# region: Fragment Router
+fragment_router = APIRouter(prefix="/fragment", tags=["Fragments"])
+
+
+@fragment_router.post("", response_model=ReportFragment)
+async def create_fragment(fragment: ReportFragmentCreate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    fragment = ReportFragment(**fragment.model_dump(), report_id=report.id)
+    database.add_model(session, fragment)
+    return fragment
+
+
+@fragment_router.patch("/{fragment_id}", response_model=ReportFragment)
+async def patch_fragment(fragment_id: int, updates: ReportFragmentUpdate, session: Session = Depends(require_session)):
+    fragment = session.get(ReportFragment, fragment_id)
+    database.partial_update_model(session, fragment, updates.model_dump())
+    return fragment
+
+
+@fragment_router.delete("/{fragment_id}")
+async def delete_fragment(fragment_id: int, session: Session = Depends(require_session)):
+    fragment = session.get(ReportFragment, fragment_id)
+    database.delete_model(session, fragment)
+
+
+# endregion: Fragment Router
+
+# region: Mixin Router
+mixin_router = APIRouter(prefix="/mixin", tags=["Mixins"])
+
+
+@mixin_router.post("", response_model=ReportMixin)
+async def create_mixin(mixin: ReportMixinCreate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    mixin = ReportMixin(**mixin.model_dump(), report_id=report.id)
+    database.add_model(session, mixin)
+    return mixin
+
+
+@mixin_router.patch("/{mixin_id}", response_model=ReportMixin)
+async def patch_mixin(mixin_id: int, updates: ReportMixinCreate, session: Session = Depends(require_session)):
+    mixin = session.get(ReportMixin, mixin_id)
+    database.partial_update_model(session, mixin, updates.model_dump())
+    return mixin
+
+
+@mixin_router.delete("/{mixin_id}")
+async def delete_mixin(mixin_id: int, session: Session = Depends(require_session)):
+    mixin = session.get(ReportMixin, mixin_id)
+    database.delete_model(session, mixin)
+
+
+# endregion: Mixin Router
+
+router = APIRouter()
+[router.include_router(r) for r in [report_router, field_router, fragment_router, mixin_router]]
