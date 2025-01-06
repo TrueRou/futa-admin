@@ -48,6 +48,12 @@ async def create_report(report: ReportCreate, session: Session = Depends(require
     return new_report
 
 
+@router.get("", response_model=List[Union[ReportPublic]])
+async def get_reports(session: Session = Depends(require_session)):
+    reports = session.exec(select(Report))
+    return reports
+
+
 @router.post("/{report_id}", response_model=Union[ReportPublicFull, ReportPublicFullAdmin])
 async def get_report(
     request: Request,
@@ -56,7 +62,7 @@ async def get_report(
     fields: List[ReportField] = Depends(require_fields),
     session: Session = Depends(require_session),
 ):
-    with_admin = request.headers.get("X-Admin", False)
+    with_admin = request.headers.get("X-Admin", "0") == "1"
     fragments = {k: v for k, v in fragments.items() if v is not None}
     data = await dispatcher.dispatch_statement(report.sql, fragments, session, report.id)
     frags = session.exec(select(ReportFragment).where(ReportFragment.report_id == report.id))

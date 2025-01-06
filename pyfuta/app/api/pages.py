@@ -4,8 +4,10 @@ from pyfuta.app import database
 from pyfuta.app.api.reports import require_report
 from pyfuta.app.database import require_session
 from pyfuta.app.models.page import Page, PageCreate, PagePublic, PageReport, PageUpdate
-from pyfuta.app.models.report import Report, ReportSimple
+from pyfuta.app.models.report import Report
 from sqlmodel import Session, select
+
+from pyfuta.app.models.report.report import ReportPublic
 
 
 router = APIRouter(prefix="/page", tags=["Pages"])
@@ -24,7 +26,7 @@ async def get_pages(session: Session = Depends(require_session)):
     results = []
     for page in pages:
         reports = session.exec(select(Report).join(PageReport).where(PageReport.page_path == page.path))
-        simple_reports = [ReportSimple.model_validate(report) for report in reports]
+        simple_reports = [ReportPublic.model_validate(report) for report in reports]
         results.append(PagePublic(**page.model_dump(), reports=simple_reports))
     return results
 
