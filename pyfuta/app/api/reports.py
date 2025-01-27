@@ -27,8 +27,8 @@ def require_report(report_id: int, session: Session = Depends(require_session)) 
     return report
 
 
-def require_field(field_id: int, report: Report = Depends(require_report), session: Session = Depends(require_session)) -> ReportField:
-    field = session.get(ReportField, (report.id, field_id))
+def require_field(field_id: int, session: Session = Depends(require_session)) -> ReportField:
+    field = session.get(ReportField, field_id)
     if field is None:
         raise HTTPException(status_code=404, detail="Field not found")
     return field
@@ -97,8 +97,8 @@ async def patch_row_in_report(
 ):
     if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
-    field = require_field(field_id, report, session)
-    nav_field = require_field(nav_field_id, report, session)
+    field = require_field(field_id, session)
+    nav_field = require_field(nav_field_id, session)
     if field.linked_field is None or nav_field.linked_field is None:
         raise HTTPException(status_code=404, detail="Field is not bound to a table field")
     value = field.type.parse(value)

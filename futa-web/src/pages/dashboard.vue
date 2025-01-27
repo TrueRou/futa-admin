@@ -10,7 +10,7 @@ pages.value = (await axios.get(`/pages`)).data
 </script>
 
 <template>
-    <el-aside width="200px" style="height: calc(100vh - 50px)">
+    <el-aside width="200px" style="height: calc(100vh - 60px)">
         <el-scrollbar>
             <el-menu class="border-r-0">
                 <el-menu-item v-for="page in pages" @click="currentPage = page" :index="page.path">
@@ -20,7 +20,7 @@ pages.value = (await axios.get(`/pages`)).data
         </el-scrollbar>
     </el-aside>
     <el-main class="overflow-y-scroll w-full relative p-0"
-        style="height: calc(100vh - 50px); border-left: 1px solid var(--el-menu-border-color);">
+        style="height: calc(100vh - 60px); border-left: 1px solid var(--el-menu-border-color);">
         <Suspense>
             <template #default>
                 <PageView v-if="currentPage" :page="currentPage" />

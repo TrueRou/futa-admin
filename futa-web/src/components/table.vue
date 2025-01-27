@@ -44,7 +44,7 @@ const tableData = computed(() => {
 const dbClickCell = (scope: any) => {
     const field = props.report.fields.find((field) => field.label === scope.column.property)!
     const navValue = scope.row[Object.keys(scope.row)[0]]
-    if (field.linked_field == null || field.linked_field == "") return
+    if (!field.linked_field) return
     if (typeof (navValue) == 'string' && navValue.indexOf("合计") != -1) return
 
     tableRowEditIndex.value = scope.$index
@@ -110,12 +110,14 @@ const tableMaxHeight = computed(() => {
                 </template>
             </el-table-column>
         </template>
-        <el-table-column width="100" fixed="right" label="操作">
-            <template #default="scope">
-                <el-button type="danger" @click="deleteRow(scope)">
-                    删除
-                </el-button>
-            </template>
-        </el-table-column>
+        <template v-if="report.linked_table && report.appendable">
+            <el-table-column width="100" fixed="right" label="操作">
+                <template #default="scope">
+                    <el-button type="danger" @click="deleteRow(scope)">
+                        删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </template>
     </el-table>
 </template>

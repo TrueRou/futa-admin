@@ -6,6 +6,7 @@ import ReportTable from '@/components/table.vue';
 import ReportChartLine from '@/components/charts/line.vue';
 import ReportFilter from '@/components/fragments/filter.vue';
 import { Plus, Minus } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
 const props = defineProps<{
     ident: number
@@ -65,6 +66,37 @@ const updateReport = () => {
     report.value = result
 }
 
+const handleFileUpload = async (report_id: number) => {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.xlsx'; // Specify the accepted file type(s) here
+    fileInput.addEventListener('change', async (event: any) => {
+        const file = event.target.files[0];
+        if (file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                ElMessage('正在导入,请稍候...');
+                // Make a POST request to the backend API endpoint to upload the file
+                const response = await axios.post('/imports/excel?report_id=' + report_id.toString(), formData);
+                if (response.status === 200) {
+                    // File uploaded successfully
+                    ElMessage({
+                        message: '导入成功.',
+                        type: 'success',
+                    })
+                }
+            } catch (error) {
+                ElMessage({
+                    message: '导入失败, 请检查文件格式是否正确.',
+                    type: 'error',
+                })
+            }
+        }
+    });
+    fileInput.click();
+};
+
 const insertFragment = async () => {
     fragmentDefs.value.push(`条件组${fragmentDefs.value.length + 1}`)
     fragmentSets.value.push({})
@@ -106,9 +138,11 @@ watch(() => props.stamp, fetchReports, { immediate: true })
             <div class="flex flex-col">
                 <div class="flex items-center justify-between">
                     <span class="font-semibold flex">{{ report?.label }}</span>
-                    <el-button class="mr-2" type="primary" @click="newRowDialogVisible = true">添加</el-button>
+                    <template v-if="report?.linked_table && report?.appendable">
+                        <el-button class="mr-2" type="primary" @click="handleFileUpload(report?.id)">批量导入</el-button>
+                        <el-button class="mr-2" type="info" @click="newRowDialogVisible = true">单条插入</el-button>
+                    </template>
                 </div>
-
                 <template v-for="(_, index) in fragmentDefs.length">
                     <div class="mt-4 flex" v-if="report?.fragments.length != 0">
                         <template v-for="fragment in report?.fragments">

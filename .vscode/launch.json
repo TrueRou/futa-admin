@@ -5,7 +5,7 @@
             "command": "npm run dev",
             "request": "launch",
             "type": "node-terminal",
-            "cwd": "${workspaceFolder}/tsfuta"
+            "cwd": "${workspaceFolder}/futa-web"
         },
         {
             "name": "Run Backend",

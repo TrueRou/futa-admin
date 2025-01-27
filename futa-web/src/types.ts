@@ -21,6 +21,8 @@ interface Report {
     id: number;
     label: string;
     type: ReportType;
+    linked_table: string | null;
+    appendable: boolean;
 }
 
 interface ReportField {

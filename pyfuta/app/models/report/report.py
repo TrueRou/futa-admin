@@ -22,6 +22,7 @@ class Report(SQLModel, table=True):
     sql: str
     type: ReportType
     linked_table: str = Field(default="")
+    appendable: bool = Field(default=False)
 
 
 class ReportCreate(SQLModel):
@@ -36,6 +37,7 @@ class ReportUpdate(SQLModel):
     sql: Optional[str]
     type: Optional[ReportType]
     linked_table: Optional[str]
+    appendable: Optional[bool]
 
 
 class ReportPublic(SQLModel):
@@ -43,6 +45,7 @@ class ReportPublic(SQLModel):
     label: str
     type: ReportType
     linked_table: str
+    appendable: bool
 
 
 class ReportPublicFull(ReportPublic):
