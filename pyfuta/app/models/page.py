@@ -20,7 +20,6 @@ class PageReport(SQLModel, table=True):
 
 
 class PageCreate(SQLModel):
-    path: str
     name: str
     description: str
 

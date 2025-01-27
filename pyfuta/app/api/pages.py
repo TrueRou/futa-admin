@@ -10,7 +10,7 @@ from sqlmodel import Session, select
 from pyfuta.app.models.report.report import ReportPublic
 
 
-router = APIRouter(prefix="/page", tags=["Pages"])
+router = APIRouter(prefix="/pages", tags=["Pages"])
 
 
 def require_page(path: str, session: Session = Depends(require_session)) -> Page:
@@ -33,14 +33,18 @@ async def get_pages(session: Session = Depends(require_session)):
 
 @router.post("/{path}", response_model=PagePublic)
 async def create_page(path: str, page: PageCreate, session: Session = Depends(require_session)):
+    if session.get(Page, path):
+        raise HTTPException(status_code=400, detail="Path already exists")
     new_page = Page(**page.model_dump(), path=path)
     database.add_model(session, new_page)
-    return new_page
+    return PagePublic(**new_page.model_dump(), reports=[])
 
 
 @router.get("/{path}", response_model=PagePublic)
-async def get_page(page: Page = Depends(require_page)):
-    return page
+async def get_page(page: Page = Depends(require_page), session: Session = Depends(require_session)):
+    reports = session.exec(select(Report).join(PageReport).where(PageReport.page_path == page.path))
+    simple_reports = [ReportPublic.model_validate(report) for report in reports]
+    return PagePublic(**page.model_dump(), reports=simple_reports)
 
 
 @router.patch("/{path}", response_model=PagePublic)
@@ -49,17 +53,17 @@ async def patch_page(updates: PageUpdate, page: Page = Depends(require_page), se
         if session.get(Page, updates.path):
             raise HTTPException(status_code=400, detail="Path already exists")
     database.partial_update_model(session, page, updates)
-    return page
+    return PagePublic(**page.model_dump(), reports=[])
 
 
-@router.delete("/{path}", response_model=PagePublic)
+@router.delete("/{path}")
 async def delete_page(page: Page = Depends(require_page), session: Session = Depends(require_session)):
     session.delete(page)
     session.commit()
     return {"message": "Page deleted successfully"}
 
 
-@router.post("/{path}/report/{report_id}")
+@router.post("/{path}/reports/{report_id}")
 async def add_report_to_page(
     report: Report = Depends(require_report),
     page: Page = Depends(require_page),
@@ -70,7 +74,7 @@ async def add_report_to_page(
     return {"message": "Report added to page successfully"}
 
 
-@router.delete("/{path}/report/{report_id}")
+@router.delete("/{path}/reports/{report_id}")
 async def remove_report_from_page(
     report: Report = Depends(require_report),
     page: Page = Depends(require_page),

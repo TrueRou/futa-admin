@@ -42,7 +42,7 @@ def require_fields(report: Report = Depends(require_report), session: Session = 
 
 
 # region: Report Router
-report_router = APIRouter(prefix="/report", tags=["Reports"])
+report_router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
 @report_router.post("", response_model=ReportPublic)
@@ -86,7 +86,7 @@ async def delete_report(report: Report = Depends(require_report), session: Sessi
     database.delete_model(session, report)
 
 
-@report_router.patch("/{report_id}/row")
+@report_router.patch("/{report_id}/rows")
 async def patch_row_in_report(
     field_id: int,
     nav_field_id: int,
@@ -106,7 +106,7 @@ async def patch_row_in_report(
     await dispatcher.dispatch_updating(report.linked_table, field.linked_field, nav_field.linked_field, value, nav_value)
 
 
-@report_router.post("/{report_id}/row")
+@report_router.post("/{report_id}/rows")
 async def insert_row_to_report(data: Dict[str, str], report: Report = Depends(require_report), session: Session = Depends(require_session)):
     if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
@@ -118,7 +118,7 @@ async def insert_row_to_report(data: Dict[str, str], report: Report = Depends(re
     await dispatcher.dispatch_inserting(report.linked_table, data)
 
 
-@report_router.delete("/{report_id}/row")
+@report_router.delete("/{report_id}/rows")
 async def delete_row_from_report(primary_key_value: str, report: Report = Depends(require_report), session: Session = Depends(require_session)):
     if report.linked_table is None:
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
@@ -132,7 +132,7 @@ async def delete_row_from_report(primary_key_value: str, report: Report = Depend
 # endregion: Report Router
 
 # region: Field Router
-field_router = APIRouter(prefix="/field", tags=["Fields"])
+field_router = APIRouter(prefix="/fields", tags=["Fields"])
 
 
 @field_router.post("", response_model=ReportField, tags=["Fields"])
@@ -165,7 +165,7 @@ async def delete_field(field: ReportField = Depends(require_field), session: Ses
 # endregion: Field Router
 
 # region: Fragment Router
-fragment_router = APIRouter(prefix="/fragment", tags=["Fragments"])
+fragment_router = APIRouter(prefix="/fragments", tags=["Fragments"])
 
 
 @fragment_router.post("", response_model=ReportFragment)
@@ -191,7 +191,7 @@ async def delete_fragment(fragment_id: int, session: Session = Depends(require_s
 # endregion: Fragment Router
 
 # region: Mixin Router
-mixin_router = APIRouter(prefix="/mixin", tags=["Mixins"])
+mixin_router = APIRouter(prefix="/mixins", tags=["Mixins"])
 
 
 @mixin_router.post("", response_model=ReportMixin)

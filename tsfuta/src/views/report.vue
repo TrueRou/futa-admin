@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ReportType, type ReportFull } from '@/types';
 import axios from 'axios';
-import { computed, ref, watch, type Ref } from 'vue';
-import ReportTable from './tables/table.vue';
-import ReportChartLine from './charts/line.vue';
-import ReportFilter from './fragments/filter.vue';
+import { ReportType, type ReportFull } from '@/types';
+import { computed, ref, watch } from 'vue';
+import ReportTable from '@/components/table.vue';
+import ReportChartLine from '@/components/charts/line.vue';
+import ReportFilter from '@/components/fragments/filter.vue';
 import { Plus, Minus } from '@element-plus/icons-vue';
 
 const props = defineProps<{
@@ -51,11 +51,11 @@ const updateReport = () => {
         report.value = values[0]
         return
     }
-    result.fields[1].name = keys[0]
+    result.fields[1].label = keys[0]
     for (let i = 1; i < length; i++) {
         const newField = { ...result.fields[1] }
-        newField.name = keys[i]
-        newField.field_id = i + 1
+        newField.label = keys[i]
+        newField.id = i + 1
         result.fields.push(newField)
 
         values[i].data.forEach((row, index) => {
@@ -105,9 +105,8 @@ watch(() => props.stamp, fetchReports, { immediate: true })
         <template #header>
             <div class="flex flex-col">
                 <div class="flex items-center justify-between">
-                    <span class="font-semibold flex">{{ report?.name }}</span>
-                    <el-button v-if="report?.is_editable" class="mr-2" type="primary"
-                        @click="newRowDialogVisible = true">添加</el-button>
+                    <span class="font-semibold flex">{{ report?.label }}</span>
+                    <el-button class="mr-2" type="primary" @click="newRowDialogVisible = true">添加</el-button>
                 </div>
 
                 <template v-for="(_, index) in fragmentDefs.length">
@@ -131,7 +130,7 @@ watch(() => props.stamp, fetchReports, { immediate: true })
     </el-card>
     <el-dialog v-model="newRowDialogVisible" title="添加条目" width="500">
         <el-form label-width="auto">
-            <el-form-item v-for="field in report?.fields.filter(f => f.linked_field)" :label="field.name">
+            <el-form-item v-for="field in report?.fields.filter(f => f.linked_field)" :label="field.label">
                 <el-input v-model="newRowForm[field.linked_field!]" autocomplete="off" />
             </el-form-item>
         </el-form>

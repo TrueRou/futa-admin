@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { useSession } from '@/store/session';
-import { useRoute } from 'vue-router';
-import Report from './reports/report.vue';
+import Report from '@/views/report.vue';
 import { ref } from 'vue';
+import type { Page } from '@/types';
 
-const session = useSession()
-const route = useRoute()
-const page = session.pages.find((page) => page.path === route.params.path)!
 const reportStamp = ref(new Date())
+
+const props = defineProps<{
+    page: Page
+}>()
+
 
 const updateStamp = () => {
     reportStamp.value = new Date()
@@ -16,10 +17,10 @@ const updateStamp = () => {
 </script>
 <template>
     <div class="ml-4 mt-4">
-        <h2>{{ page.name }}</h2>
-        <p class="text-lg">{{ page.description }}</p>
+        <h2>{{ props.page.name }}</h2>
+        <p class="text-lg">{{ props.page.description }}</p>
     </div>
-    <div class="ml-4 mr-4 mt-4 mb-4" v-for="report in page.reports.sort((a, b) => a.id - b.id)" :key="report.id">
+    <div class="ml-4 mr-4 mt-4 mb-4" v-for="report in props.page.reports.sort((a, b) => a.id - b.id)" :key="report.id">
         <Report :ident="report.id" :stamp="reportStamp" @updateStamp="updateStamp"></Report>
     </div>
 </template>

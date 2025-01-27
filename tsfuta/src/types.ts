@@ -17,19 +17,18 @@ enum ReportFieldType {
     NUMBER = 2
 }
 
-interface ReportSimple {
+interface Report {
     id: number;
-    name: string;
+    label: string;
     type: ReportType;
 }
 
 interface ReportField {
-    name: string;
+    id: number;
+    order: number;
+    label: string;
     type: ReportFieldType;
     linked_field: string | null;
-    field_id: number;
-    is_fixed: boolean;
-    width: number | null;
 }
 
 interface ReportFragment {
@@ -45,9 +44,7 @@ interface ReportMixin {
     values: Record<string, any>;
 }
 
-interface ReportFull extends ReportSimple {
-    is_editable: boolean;
-    updateable_fields_only: boolean;
+interface ReportFull extends Report {
     fields: ReportField[];
     fragments: ReportFragment[];
     mixins: ReportMixin[];
@@ -58,7 +55,7 @@ interface Page {
     path: string;
     name: string;
     description: string;
-    reports: ReportSimple[];
+    reports: Report[];
 }
 
-export { ReportType, ReportFieldType, ReportFragmentType, type ReportSimple, type ReportField, type ReportFragment, type ReportFull, type Page };
+export { ReportType, ReportFieldType, ReportFragmentType, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type Page };

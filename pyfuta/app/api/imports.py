@@ -10,7 +10,7 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlmodel import SQLModel, Session
 from pyfuta.app.database import async_engine
 
-router = APIRouter(prefix="/import", tags=["Import"])
+router = APIRouter(prefix="/imports", tags=["Imports"])
 
 
 @router.post("/excel")
