@@ -35,6 +35,8 @@ async def get_pages(session: Session = Depends(require_session)):
 async def create_page(path: str, page: PageCreate, session: Session = Depends(require_session)):
     if session.get(Page, path):
         raise HTTPException(status_code=400, detail="Path already exists")
+    if path == "":
+        raise HTTPException(status_code=400, detail="Path cannot be empty string")
     new_page = Page(**page.model_dump(), path=path)
     database.add_model(session, new_page)
     return PagePublic(**new_page.model_dump(), reports=[])
@@ -52,12 +54,16 @@ async def patch_page(updates: PageUpdate, page: Page = Depends(require_page), se
     if updates.path and updates.path != page.path:
         if session.get(Page, updates.path):
             raise HTTPException(status_code=400, detail="Path already exists")
+    if updates.path == "":
+        raise HTTPException(status_code=400, detail="Path cannot be empty string")
     database.partial_update_model(session, page, updates)
     return PagePublic(**page.model_dump(), reports=[])
 
 
 @router.delete("/{path}")
 async def delete_page(page: Page = Depends(require_page), session: Session = Depends(require_session)):
+    page_reports = session.exec(select(PageReport).where(PageReport.page_path == page.path)).all()
+    [session.delete(page_report) for page_report in page_reports]
     session.delete(page)
     session.commit()
     return {"message": "Page deleted successfully"}

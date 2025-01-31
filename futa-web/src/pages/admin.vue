@@ -2,13 +2,13 @@
     <el-container class="layout-container-demo" style="height: calc(100vh - 60px)">
         <el-aside width="200px">
             <el-scrollbar>
-                <el-menu class="border-r-0">
+                <el-menu :default-active="$route.path" class="border-r-0" router>
                     <el-menu-item>
                         <el-icon>
                             <house />
                         </el-icon>回到主页
                     </el-menu-item>
-                    <el-sub-menu>
+                    <el-sub-menu index="1">
                         <template #title>
                             <el-icon>
                                 <files />
@@ -16,7 +16,7 @@
                         </template>
                         <el-menu-item-group>
                             <template #title>页面元素</template>
-                            <el-menu-item>
+                            <el-menu-item index="/admin/pages">
                                 <el-icon>
                                     <document />
                                 </el-icon>页面定义
@@ -44,18 +44,9 @@
                 </el-menu>
             </el-scrollbar>
         </el-aside>
-        <el-container>
-            <el-main class="overflow-y-scroll w-full"
-                style="height: calc(100vh - 60px); border-left: 1px solid var(--el-menu-border-color);">
-                <el-scrollbar>
-                    <el-table :data="tableData">
-                        <el-table-column prop="date" label="Date" width="140" />
-                        <el-table-column prop="name" label="Name" width="120" />
-                        <el-table-column prop="address" label="Address" />
-                    </el-table>
-                </el-scrollbar>
-            </el-main>
-        </el-container>
+        <el-main style="border-left: 1px solid var(--el-menu-border-color);" class="w-full h-full overflow-y-hidden">
+            <router-view />
+        </el-main>
     </el-container>
 </template>
 

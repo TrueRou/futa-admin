@@ -13,7 +13,14 @@ const router = createRouter({
     {
       path: '/admin',
       name: 'Admin',
-      component: Admin
+      component: Admin,
+      children: [
+        {
+          path: 'pages',
+          name: 'AdminPages',
+          component: () => import('@/pages/admin/pages.vue')
+        }
+      ]
     }
   ]
 })
