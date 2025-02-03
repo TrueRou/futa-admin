@@ -64,7 +64,7 @@ const cancelForm = () => {
 }
 </script>
 <template>
-    <el-card shadow="hover" class="h-full" body-class="h-full">
+    <el-card shadow="never" class="h-full border-0" body-class="h-full">
         <template #header>
             <div class="flex justify-between">
                 <span class="font-semibold flex items-center">页面定义</span>

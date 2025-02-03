@@ -1,8 +1,8 @@
 <template>
-    <el-container class="layout-container-demo" style="height: calc(100vh - 60px)">
+    <el-container class="layout-container" style="height: calc(100vh - 60px)">
         <el-aside width="200px">
             <el-scrollbar>
-                <el-menu :default-active="$route.path" class="border-r-0" router>
+                <el-menu :default-active="$route.path" :default-openeds="['1']" class="border-r-0" router>
                     <el-menu-item>
                         <el-icon>
                             <house />
@@ -21,7 +21,7 @@
                                     <document />
                                 </el-icon>页面定义
                             </el-menu-item>
-                            <el-menu-item>
+                            <el-menu-item index="/admin/reports">
                                 <el-icon>
                                     <data-analysis />
                                 </el-icon>图表定义
@@ -50,39 +50,22 @@
     </el-container>
 </template>
 
-<script lang="ts" setup>
-import { ref } from 'vue'
-import { Menu as IconMenu, Message, Setting } from '@element-plus/icons-vue'
-
-const item = {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-}
-const tableData = ref(Array.from({ length: 20 }).fill(item))
-</script>
-
 <style scoped>
-.layout-container-demo .el-header {
+.layout-container .el-header {
     position: relative;
     background-color: var(--el-color-primary-light-7);
     color: var(--el-text-color-primary);
 }
 
-.layout-container-demo .el-aside {
-    color: var(--el-text-color-primary);
-    background: var(--el-color-primary-light-8);
-}
-
-.layout-container-demo .el-menu {
+.layout-container .el-menu {
     border-right: none;
 }
 
-.layout-container-demo .el-main {
+.layout-container .el-main {
     padding: 0;
 }
 
-.layout-container-demo .toolbar {
+.layout-container .toolbar {
     display: inline-flex;
     align-items: center;
     justify-content: center;

@@ -27,9 +27,9 @@ class Report(SQLModel, table=True):
 
 class ReportCreate(SQLModel):
     label: str
-    sql: str
     type: ReportType
     linked_table: Optional[str]
+    appendable: Optional[bool]
 
 
 class ReportUpdate(SQLModel):
@@ -53,6 +53,10 @@ class ReportPublicFull(ReportPublic):
     fragments: List[ReportFragmentPublic]
     mixins: List[ReportMixinPublic]
     data: List[Tuple]  # this will be the data returned from the table query
+
+
+class ReportPublicAdmin(ReportPublic):
+    sql: str
 
 
 class ReportPublicFullAdmin(ReportPublicFull):

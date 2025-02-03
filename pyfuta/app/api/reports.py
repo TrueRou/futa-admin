@@ -5,6 +5,7 @@ from pyfuta.app.database import require_session
 from pyfuta.app.models.report.field import ReportFieldCreate, ReportFieldUpdate
 from pyfuta.app.models.report.fragment import ReportFragmentCreate, ReportFragmentUpdate
 from pyfuta.app.models.report.mixin import ReportMixinCreate
+from pyfuta.app.models.report.report import ReportPublicAdmin
 from pyfuta.app.utils import dispatcher
 from pyfuta.app.models.report import (
     Report,
@@ -47,7 +48,7 @@ report_router = APIRouter(prefix="/reports", tags=["Reports"])
 
 @report_router.post("", response_model=ReportPublic)
 async def create_report(report: ReportCreate, session: Session = Depends(require_session)):
-    new_report = Report(**report.model_dump())
+    new_report = Report(**report.model_dump(), sql="SELECT 1")
     database.add_model(session, new_report)
     return new_report
 
@@ -58,8 +59,13 @@ async def get_reports(session: Session = Depends(require_session)):
     return reports
 
 
+@report_router.get("/{report_id}", response_model=ReportPublicAdmin)
+async def get_report(report: Report = Depends(require_report)):
+    return report
+
+
 @report_router.post("/{report_id}", response_model=Union[ReportPublicFull, ReportPublicFullAdmin])
-async def get_report(
+async def query_report(
     request: Request,
     fragments: Dict[str, Any] = {},
     report: Report = Depends(require_report),
@@ -133,6 +139,14 @@ async def delete_row_from_report(primary_key_value: str, report: Report = Depend
 
 # region: Field Router
 field_router = APIRouter(prefix="/fields", tags=["Fields"])
+
+
+@field_router.get("", response_model=List[ReportField])
+async def get_fields(report_id: int, session: Session = Depends(require_session)):
+    fields = session.exec(select(ReportField).where(ReportField.report_id == report_id)).all()
+    if not fields:
+        raise HTTPException(status_code=404, detail="No fields found for the report")
+    return fields
 
 
 @field_router.post("", response_model=ReportField, tags=["Fields"])

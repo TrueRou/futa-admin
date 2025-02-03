@@ -53,6 +53,10 @@ interface ReportFull extends Report {
     data: (string | number)[][];
 }
 
+interface ReportAdmin extends Report {
+    sql: string;
+}
+
 interface Page {
     path: string;
     name: string;
@@ -60,4 +64,4 @@ interface Page {
     reports: Report[];
 }
 
-export { ReportType, ReportFieldType, ReportFragmentType, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type Page };
+export { ReportType, ReportFieldType, ReportFragmentType, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type ReportAdmin, type Page };

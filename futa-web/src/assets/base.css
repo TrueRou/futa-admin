@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 .el-card__body {
-    padding: 0;
+  padding: 0;
+}
+
+.el-tabs__header {
+  margin-bottom: 0;
 }
