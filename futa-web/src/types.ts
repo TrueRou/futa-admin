@@ -43,8 +43,9 @@ interface ReportFragment {
 }
 
 interface ReportMixin {
+    id: number;
     ref_variable: string;
-    values: Record<string, any>;
+    values: string;
 }
 
 interface ReportFull extends Report {
@@ -72,4 +73,4 @@ const ReportTypeMap = {
     4: "月份选择器",
 }
 
-export { ReportType, ReportFieldType, ReportFragmentType, ReportTypeMap, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type ReportAdmin, type Page };
+export { ReportType, ReportFieldType, ReportFragmentType, ReportTypeMap, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type ReportAdmin, type Page, type ReportMixin };

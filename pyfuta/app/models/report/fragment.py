@@ -1,6 +1,5 @@
 from enum import IntEnum, auto
-from typing import Dict, Optional
-from sqlalchemy import JSON, Column
+from typing import Optional
 from sqlmodel import Field, SQLModel
 
 

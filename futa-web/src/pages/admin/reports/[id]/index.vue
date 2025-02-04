@@ -34,12 +34,8 @@ const autoSave = debounce(async () => {
 }, 500)
 
 const fetchReport = async (id: string | string[]) => {
-    try {
-        const { data } = await axios.get<ReportAdmin>(`/reports/${id}`)
-        report.value = data
-    } catch (error) {
-        ElMessage.error('数据加载失败')
-    }
+    const { data } = await axios.get<ReportAdmin>(`/reports/${id}`)
+    report.value = data
 }
 
 watch(
@@ -109,7 +105,7 @@ watch(() => route.params.id, fetchReport, { immediate: true })
                 <report-fragments :report="report" />
             </el-tab-pane>
             <el-tab-pane label="混合器管理" lazy>
-                <report-mixins />
+                <report-mixins :report="report" />
             </el-tab-pane>
         </el-tabs>
     </div>

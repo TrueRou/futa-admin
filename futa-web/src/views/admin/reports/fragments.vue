@@ -18,6 +18,7 @@ const formRules = {
     label: [{ required: true, message: '请输入筛选标签', trigger: 'blur' }],
     type: [{ required: true, message: '请选择筛选类型', trigger: 'change' }],
     sql: [{ required: true, message: '请输入SQL语句', trigger: 'blur' }],
+    extends: [{ required: true, message: '请输入自定义选择器配置', trigger: 'blur' }],
 };
 
 onMounted(async () => {
@@ -124,7 +125,7 @@ const deleteFragment = async (fragment: ReportFragment) => {
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="自定义配置" v-if="formModel.type === ReportFragmentType.FILTER_SELECT">
+            <el-form-item label="自定义配置" prop="extends" v-if="formModel.type === ReportFragmentType.FILTER_SELECT">
                 <b-ace-editor v-model="formModel.extends!" lang="json" width="100%" height="200px" theme="chrome" />
             </el-form-item>
 

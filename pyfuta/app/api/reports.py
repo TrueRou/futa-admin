@@ -231,6 +231,11 @@ async def get_mixins(report_id: int, session: Session = Depends(require_session)
 
 @mixin_router.post("", response_model=ReportMixin)
 async def create_mixin(mixin: ReportMixinCreate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    try:
+        if mixin.values:
+            json.loads(mixin.values)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for extends")
     mixin = ReportMixin(**mixin.model_dump(), report_id=report.id)
     database.add_model(session, mixin)
     return mixin
@@ -238,6 +243,11 @@ async def create_mixin(mixin: ReportMixinCreate, report: Report = Depends(requir
 
 @mixin_router.patch("/{mixin_id}", response_model=ReportMixin)
 async def patch_mixin(mixin_id: int, updates: ReportMixinCreate, session: Session = Depends(require_session)):
+    try:
+        if updates.values:
+            json.loads(updates.values)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for values")
     mixin = session.get(ReportMixin, mixin_id)
     database.partial_update_model(session, mixin, updates.model_dump())
     return mixin
