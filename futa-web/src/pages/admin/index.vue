@@ -3,7 +3,7 @@
         <el-aside width="200px">
             <el-scrollbar>
                 <el-menu :default-active="$route.path" :default-openeds="['1']" class="border-r-0" router>
-                    <el-menu-item>
+                    <el-menu-item index="/">
                         <el-icon>
                             <house />
                         </el-icon>回到主页
