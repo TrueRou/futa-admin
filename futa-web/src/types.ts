@@ -34,11 +34,12 @@ interface ReportField {
 }
 
 interface ReportFragment {
+    id: number;
     trait: string;
-    name: string;
+    label: string;
     type: ReportFragmentType;
-    labels: string[];
-    values: string[];
+    extends: string;
+    sql: string;
 }
 
 interface ReportMixin {
@@ -64,4 +65,11 @@ interface Page {
     reports: Report[];
 }
 
-export { ReportType, ReportFieldType, ReportFragmentType, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type ReportAdmin, type Page };
+const ReportTypeMap = {
+    1: "自定义选择器",
+    2: "时段选择器",
+    3: "单日选择器",
+    4: "月份选择器",
+}
+
+export { ReportType, ReportFieldType, ReportFragmentType, ReportTypeMap, type Report as ReportSimple, type ReportField, type ReportFragment, type ReportFull, type ReportAdmin, type Page };

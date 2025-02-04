@@ -19,7 +19,7 @@ class ReportFragment(SQLModel, table=True):
     label: str
     type: ReportFragmentType
     sql: str
-    values: Dict = Field(sa_column=Column(JSON), default_factory=dict)
+    extends: str = Field(default="")
 
     report_id: int = Field(foreign_key="def_reports.id", index=True)
 
@@ -29,7 +29,7 @@ class ReportFragmentCreate(SQLModel):
     label: str
     type: ReportFragmentType
     sql: str
-    values: Dict
+    extends: str
 
 
 class ReportFragmentUpdate(SQLModel):
@@ -37,7 +37,7 @@ class ReportFragmentUpdate(SQLModel):
     label: Optional[str]
     type: Optional[ReportFragmentType]
     sql: Optional[str]
-    values: Optional[Dict]
+    extends: Optional[str]
 
 
 class ReportFragmentPublic(SQLModel):
@@ -45,8 +45,4 @@ class ReportFragmentPublic(SQLModel):
     trait: str
     label: str
     type: ReportFragmentType
-    values: Dict
-
-
-class ReportFragmentPublicAdmin(ReportFragmentPublic):
-    sql: str
+    extends: str

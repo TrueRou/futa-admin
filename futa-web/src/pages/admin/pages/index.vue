@@ -11,7 +11,11 @@ const formTitle = ref("");
 const formModel = ref<Page>();
 const formModelReports = ref<number[]>([]);
 const formRef = ref<FormInstance>()
-const formRules = ref({ path: [{ required: true, message: "请输入路径", trigger: "blur" }], name: [{ required: true, message: "请输入名称", trigger: "blur" }], description: [{ required: true, message: "请输入描述", trigger: "blur" }] });
+const formRules = {
+    path: [{ required: true, message: "请输入路径", trigger: "blur" }],
+    name: [{ required: true, message: "请输入名称", trigger: "blur" }],
+    description: [{ required: true, message: "请输入描述", trigger: "blur" }]
+}
 pages.value = (await axios.get(`/pages`)).data
 reports.value = (await axios.get(`/reports`)).data;
 
@@ -90,19 +94,22 @@ const cancelForm = () => {
             </el-table-column>
         </el-table>
     </el-card>
-    <el-dialog v-model="formShow" :title="formTitle" width="30%" draggable align-center>
+    <el-dialog v-model="formShow" :title="formTitle" width="600px" draggable align-center>
         <template #default>
-            <el-form ref="formRef" :model="formModel" status-icon :rules="formRules">
+            <el-form ref="formRef" :model="formModel" status-icon :rules="formRules" v-if="formModel">
                 <el-form-item label="路径" prop="path">
-                    <el-input v-model="formModel!.path" autocomplete="off" />
+                    <el-input v-model="formModel.path" autocomplete="off" />
                 </el-form-item>
+
                 <el-form-item label="名称" prop="name">
-                    <el-input v-model="formModel!.name" autocomplete="off" />
+                    <el-input v-model="formModel.name" autocomplete="off" />
                 </el-form-item>
+
                 <el-form-item label="描述" prop="description">
-                    <el-input v-model="formModel!.description" autocomplete="off" />
+                    <el-input v-model="formModel.description" autocomplete="off" />
                 </el-form-item>
-                <el-form-item label="链接图表">
+
+                <el-form-item label="链接图表" prop="report">
                     <el-select filterable v-model="formModelReports" multiple collapse-tags placeholder="请选择链接的图表">
                         <el-option v-for="report in reports" :label="report.label" :value="report.id">
                             <span style="float: left">{{ report.label }}</span>

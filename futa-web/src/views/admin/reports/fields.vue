@@ -52,35 +52,27 @@ const confirmForm = async (formRef: FormInstance | undefined) => {
     await formRef?.validate(async (valid) => {
         if (!valid) return;
 
-        try {
-            if (formType.value === 'add') {
-                const response = await axios.post('/fields?report_id=' + props.report!.id, formModel.value);
-                fields.value.push(response.data);
-                ElMessage.success('新增成功');
-            } else {
-                await axios.patch(`/fields/${formModel.value.id}`, formModel.value);
-                const index = fields.value.findIndex(f => f.id === formModel.value.id);
-                if (index !== -1) {
-                    fields.value[index] = { ...fields.value[index], ...formModel.value };
-                }
-                ElMessage.success('修改成功');
+        if (formType.value === 'add') {
+            const response = await axios.post('/fields?report_id=' + props.report!.id, formModel.value);
+            fields.value.push(response.data);
+            ElMessage.success('新增成功');
+        } else {
+            await axios.patch(`/fields/${formModel.value.id}`, formModel.value);
+            const index = fields.value.findIndex(f => f.id === formModel.value.id);
+            if (index !== -1) {
+                fields.value[index] = { ...fields.value[index], ...formModel.value };
             }
-            await fetchFields();
-            formShow.value = false;
-        } catch (error: any) {
-            ElMessage.error(error.response?.data?.detail || '操作失败');
+            ElMessage.success('修改成功');
         }
+        await fetchFields();
+        formShow.value = false;
     });
 };
 
 const deleteField = async (field: ReportField) => {
-    try {
-        await axios.delete(`/fields/${field.id}`);
-        fields.value = fields.value.filter(f => f.id !== field.id);
-        ElMessage.success('删除成功');
-    } catch (error) {
-        ElMessage.error('删除失败');
-    }
+    await axios.delete(`/fields/${field.id}`);
+    fields.value = fields.value.filter(f => f.id !== field.id);
+    ElMessage.success('删除成功');
 };
 
 const moveField = async (field: ReportField, direction: 'up' | 'down') => {
@@ -90,18 +82,14 @@ const moveField = async (field: ReportField, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= fields.value.length) return;
 
-    try {
-        await axios.patch(`/fields/${field.id}`, {
-            label: null,
-            type: null,
-            linked_field: null,
-            order: fields.value[targetIndex].order
-        });
-        await fetchFields();
-        ElMessage.success('移动成功');
-    } catch (error) {
-        ElMessage.error('移动失败');
-    }
+    await axios.patch(`/fields/${field.id}`, {
+        label: null,
+        type: null,
+        linked_field: null,
+        order: fields.value[targetIndex].order
+    });
+    await fetchFields();
+    ElMessage.success('移动成功');
 };
 </script>
 

@@ -10,7 +10,11 @@ const reports = ref<ReportSimple[]>([]);
 const formShow = ref(false);
 const formModel = ref<ReportSimple>();
 const formRef = ref<FormInstance>()
-const formRules = ref({ label: [{ required: true, message: "请输入名称", trigger: "blur" }], type: [{ required: true, message: "请输入类型", trigger: "blur" }], appendable: [{ required: true, message: "请输入是否可插入", trigger: "blur" }] });
+const formRules = {
+    label: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+    type: [{ required: true, message: '请选择类型', trigger: 'blur' }],
+    appendable: [{ required: true, message: '请选择是否可插入', trigger: 'blur' }],
+};
 reports.value = (await axios.get(`/reports`)).data;
 
 const deleteReport = async (report: ReportSimple) => {
@@ -52,10 +56,8 @@ const cancelForm = () => {
         </template>
         <el-table :data="reports" :stripe="true" class="h-full">
             <el-table-column :show-overflow-tooltip="false" prop="id" label="ID" width="100" />
-            <el-table-column :show-overflow-tooltip="false" prop="type" label="图表类型" width="150" />
             <el-table-column :show-overflow-tooltip="true" prop="label" label="图表名称" />
-            <el-table-column :show-overflow-tooltip="true" prop="linked_table" label="关联库表" width="200" />
-            <el-table-column :show-overflow-tooltip="true" prop="appendable" label="允许插入" width="150" />
+            <el-table-column :show-overflow-tooltip="true" prop="linked_table" label="关联数据表" width="300" />
             <el-table-column width="165" fixed="right" label="操作">
                 <template #default="scope">
                     <div class="flex">
@@ -68,22 +70,28 @@ const cancelForm = () => {
     </el-card>
     <el-dialog v-model="formShow" title="创建图表" width="30%" draggable align-center>
         <template #default>
-            <el-form ref="formRef" :model="formModel" status-icon :rules="formRules">
-                <el-form-item label="图表名称" prop="name">
-                    <el-input v-model="formModel!.label" autocomplete="off" />
+            <el-form ref="formRef" :model="formModel" status-icon :rules="formRules" v-if="formModel">
+                <el-form-item label="图表标签" prop="label">
+                    <el-input v-model="formModel.label" autocomplete="off" />
                 </el-form-item>
+
                 <el-form-item label="图表类型" prop="type">
-                    <el-input v-model="formModel!.type" autocomplete="off" />
+                    <el-select v-model="formModel.type" placeholder="请选择类型">
+                        <el-option label="表格" :value="ReportType.FORM"></el-option>
+                        <el-option label="折线图" :value="ReportType.LINE_CHART"></el-option>
+                        <el-option label="柱状图" :value="ReportType.BAR_CHART"></el-option>
+                    </el-select>
                 </el-form-item>
+
                 <el-form-item label="允许插入" prop="appendable">
-                    <el-input v-model="formModel!.appendable" autocomplete="off" />
+                    <el-switch v-model="formModel.appendable" />
                 </el-form-item>
             </el-form>
         </template>
         <template #footer>
             <span>
-                <el-button type="primary" @click="confirmForm(formRef)">确认</el-button>
                 <el-button @click="cancelForm()">取消</el-button>
+                <el-button type="primary" @click="confirmForm(formRef)">确认</el-button>
             </span>
         </template>
     </el-dialog>

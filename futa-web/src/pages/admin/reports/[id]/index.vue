@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ReportAdmin } from '@/types';
+import { ReportType, type ReportAdmin } from '@/types';
 import axios from 'axios';
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -83,7 +83,9 @@ watch(() => route.params.id, fetchReport, { immediate: true })
 
                 <el-form-item label="报告类型">
                     <el-select v-model="report.type" placeholder="请选择报告类型" class="w-full">
-                        <el-option v-for="t in ['TABLE', 'VIEW', 'CUSTOM']" :key="t" :label="t" :value="t" />
+                        <el-option label="表格" :value="ReportType.FORM"></el-option>
+                        <el-option label="折线图" :value="ReportType.LINE_CHART"></el-option>
+                        <el-option label="柱状图" :value="ReportType.BAR_CHART"></el-option>
                     </el-select>
                 </el-form-item>
 
@@ -104,7 +106,7 @@ watch(() => route.params.id, fetchReport, { immediate: true })
                 <report-fields :report="report" />
             </el-tab-pane>
             <el-tab-pane label="筛选器管理" lazy>
-                <report-fragments />
+                <report-fragments :report="report" />
             </el-tab-pane>
             <el-tab-pane label="混合器管理" lazy>
                 <report-mixins />

@@ -1,9 +1,10 @@
+import json
 from typing import Any, Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pyfuta.app import database
 from pyfuta.app.database import require_session
 from pyfuta.app.models.report.field import ReportFieldCreate, ReportFieldUpdate
-from pyfuta.app.models.report.fragment import ReportFragmentCreate, ReportFragmentUpdate
+from pyfuta.app.models.report.fragment import ReportFragmentCreate, ReportFragmentPublic, ReportFragmentUpdate
 from pyfuta.app.models.report.mixin import ReportMixinCreate
 from pyfuta.app.models.report.report import ReportPublicAdmin
 from pyfuta.app.utils import dispatcher
@@ -144,8 +145,6 @@ field_router = APIRouter(prefix="/fields", tags=["Fields"])
 @field_router.get("", response_model=List[ReportField])
 async def get_fields(report_id: int, session: Session = Depends(require_session)):
     fields = session.exec(select(ReportField).where(ReportField.report_id == report_id)).all()
-    if not fields:
-        raise HTTPException(status_code=404, detail="No fields found for the report")
     return fields
 
 
@@ -182,8 +181,19 @@ async def delete_field(field: ReportField = Depends(require_field), session: Ses
 fragment_router = APIRouter(prefix="/fragments", tags=["Fragments"])
 
 
+@fragment_router.get("", response_model=List[ReportFragment])
+async def get_fragments(report_id: int, session: Session = Depends(require_session)):
+    fragments = session.exec(select(ReportFragment).where(ReportFragment.report_id == report_id)).all()
+    return fragments
+
+
 @fragment_router.post("", response_model=ReportFragment)
 async def create_fragment(fragment: ReportFragmentCreate, report: Report = Depends(require_report), session: Session = Depends(require_session)):
+    try:
+        if fragment.extends:
+            json.loads(fragment.extends)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for extends")
     fragment = ReportFragment(**fragment.model_dump(), report_id=report.id)
     database.add_model(session, fragment)
     return fragment
@@ -191,6 +201,11 @@ async def create_fragment(fragment: ReportFragmentCreate, report: Report = Depen
 
 @fragment_router.patch("/{fragment_id}", response_model=ReportFragment)
 async def patch_fragment(fragment_id: int, updates: ReportFragmentUpdate, session: Session = Depends(require_session)):
+    try:
+        if updates.extends:
+            json.loads(updates.extends)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format for extends")
     fragment = session.get(ReportFragment, fragment_id)
     database.partial_update_model(session, fragment, updates.model_dump())
     return fragment
@@ -206,6 +221,12 @@ async def delete_fragment(fragment_id: int, session: Session = Depends(require_s
 
 # region: Mixin Router
 mixin_router = APIRouter(prefix="/mixins", tags=["Mixins"])
+
+
+@mixin_router.get("", response_model=List[ReportMixin])
+async def get_mixins(report_id: int, session: Session = Depends(require_session)):
+    mixins = session.exec(select(ReportMixin).where(ReportMixin.report_id == report_id)).all()
+    return mixins
 
 
 @mixin_router.post("", response_model=ReportMixin)
