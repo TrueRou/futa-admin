@@ -63,7 +63,7 @@ const onInputTableBlur = async (scope: any) => {
     const navValue = navCols.value[scope.$index]
     const value = scope.row[scope.column.property]
 
-    await axios.patch(`/reports/${props.report.id}?` + qs.stringify({
+    await axios.patch(`/reports/${props.report.id}/rows?` + qs.stringify({
         nav_field_id: navField.id,
         nav_value: navValue,
         field_id: upsertField.id,

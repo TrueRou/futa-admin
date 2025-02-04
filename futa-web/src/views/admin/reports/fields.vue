@@ -105,7 +105,11 @@ const moveField = async (field: ReportField, direction: 'up' | 'down') => {
         <el-table :data="fields" row-key="id" class="h-full">
             <el-table-column prop="order" label="排序" width="80" />
             <el-table-column prop="label" label="字段标签" width="150" />
-            <el-table-column prop="type" label="字段类型" width="120" />
+            <el-table-column prop="type" label="字段类型" width="120">
+                <template #default="{ row }">
+                    {{ row.type === ReportFieldType.NUMBER ? '数字' : '文本' }}
+                </template>
+            </el-table-column>
             <el-table-column prop="linked_field" label="关联字段" />
             <el-table-column label="操作" width="336" fixed="right">
                 <template #default="scope">
@@ -134,9 +138,8 @@ const moveField = async (field: ReportField, direction: 'up' | 'down') => {
 
             <el-form-item label="类型" prop="type">
                 <el-select v-model="formModel.type!" placeholder="请选择字段类型">
-                    <el-option label="文本" value="text" />
-                    <el-option label="数字" value="number" />
-                    <el-option label="日期" value="date" />
+                    <el-option label="数字" :value="ReportFieldType.NUMBER" />
+                    <el-option label="文本" :value="ReportFieldType.TEXT" />
                 </el-select>
             </el-form-item>
 

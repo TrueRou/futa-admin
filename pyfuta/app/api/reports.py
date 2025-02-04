@@ -106,8 +106,8 @@ async def patch_row_in_report(
         raise HTTPException(status_code=404, detail="Report is not bound to a table")
     field = require_field(field_id, session)
     nav_field = require_field(nav_field_id, session)
-    if field.linked_field is None or nav_field.linked_field is None:
-        raise HTTPException(status_code=404, detail="Field is not bound to a table field")
+    if not field.linked_field or not nav_field.linked_field:
+        raise HTTPException(status_code=404, detail="Field or nav field is not bound to a table field")
     value = field.type.parse(value)
     nav_value = nav_field.type.parse(nav_value)
     await dispatcher.dispatch_updating(report.linked_table, field.linked_field, nav_field.linked_field, value, nav_value)

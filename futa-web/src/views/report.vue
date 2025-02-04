@@ -81,6 +81,7 @@ const handleFileUpload = async (report_id: number) => {
                 const response = await axios.post('/imports/excel?report_id=' + report_id.toString(), formData);
                 if (response.status === 200) {
                     // File uploaded successfully
+                    await fetchReports()
                     ElMessage({
                         message: '导入成功.',
                         type: 'success',
@@ -138,10 +139,10 @@ watch(() => props.stamp, fetchReports, { immediate: true })
             <div class="flex flex-col">
                 <div class="flex items-center justify-between">
                     <span class="font-semibold flex">{{ report?.label }}</span>
-                    <template v-if="report?.linked_table && report?.appendable">
-                        <el-button class="mr-2" type="primary" @click="handleFileUpload(report?.id)">批量导入</el-button>
-                        <el-button class="mr-2" type="info" @click="newRowDialogVisible = true">单条插入</el-button>
-                    </template>
+                    <div class="mr-2" v-if="report?.linked_table && report?.appendable">
+                        <el-button type="info" @click="handleFileUpload(report?.id)">批量导入</el-button>
+                        <el-button type="primary" @click="newRowDialogVisible = true">单条插入</el-button>
+                    </div>
                 </div>
                 <template v-for="(_, index) in fragmentDefs.length">
                     <div class="mt-4 flex" v-if="report?.fragments.length != 0">
